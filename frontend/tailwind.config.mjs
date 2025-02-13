@@ -112,6 +112,10 @@ module.exports = {
           '0%': { opacity: '0', transform: 'scale(0.9)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
+        'pulse-subtle': {
+          '0%, 100%': { opacity: '0.2' },
+          '50%': { opacity: '0.4' },
+        },
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
@@ -122,6 +126,7 @@ module.exports = {
         'float-up': 'float-up 2s ease-out forwards',
         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
         'fade-in': 'fadeIn 0.5s ease-out forwards',
+        'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
   		},
       backgroundImage: {
         'ornate-border': "url('/images/ornate-border.png')",

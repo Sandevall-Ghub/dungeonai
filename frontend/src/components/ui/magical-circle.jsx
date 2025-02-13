@@ -1,43 +1,142 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Button } from "@/components/ui/button"
+import { Plus, Minus } from "lucide-react"
 
 export function MagicalCircle({ 
-  selectedTab, 
   stats, 
-  onStatClick,
+  onStatChange,
+  pointsRemaining,
   className = "" 
 }) {
-  const [activeStats, setActiveStats] = useState([])
-
-  // Define stat nodes based on selected tab
-  const getStatNodes = () => {
-    switch (selectedTab) {
-      case 'character':
-        return [
-          { id: 'strength', label: 'Strength', value: stats.strength, color: 'red' },
-          { id: 'dexterity', label: 'Dexterity', value: stats.dexterity, color: 'green' },
-          { id: 'constitution', label: 'Constitution', value: stats.constitution, color: 'yellow' },
-          { id: 'intelligence', label: 'Intelligence', value: stats.intelligence, color: 'blue' },
-          { id: 'wisdom', label: 'Wisdom', value: stats.wisdom, color: 'purple' },
-          { id: 'charisma', label: 'Charisma', value: stats.charisma, color: 'pink' }
-        ]
-      case 'skills':
-        return [
-          { id: 'combat', label: 'Combat', value: stats.combat, color: 'red' },
-          { id: 'magic', label: 'Magic', value: stats.magic, color: 'blue' },
-          { id: 'stealth', label: 'Stealth', value: stats.stealth, color: 'green' }
-        ]
-      default:
-        return []
-    }
+  // D&D 5e Point Buy Rules
+  const POINT_COSTS = {
+    8: 0, 9: 1, 10: 2, 11: 3, 12: 4,
+    13: 5, 14: 7, 15: 9
   }
+
+  const getPointCost = (currentValue, increase = true) => {
+    if (increase) {
+      return POINT_COSTS[currentValue + 1] - POINT_COSTS[currentValue]
+    }
+    return POINT_COSTS[currentValue] - POINT_COSTS[currentValue - 1]
+  }
+
+  const canIncreaseStat = (stat) => {
+    const cost = getPointCost(stats[stat.id])
+    return stats[stat.id] < 15 && pointsRemaining >= cost
+  }
+
+  const canDecreaseStat = (stat) => {
+    return stats[stat.id] > 8
+  }
+
+  const getModifier = (value) => {
+    return Math.floor((value - 10) / 2)
+  }
+
+  const StatNode = ({ stat, index, total }) => {
+    const angle = (index * 360) / total
+    const radius = 180
+    const x = 250 + radius * Math.cos((angle - 90) * (Math.PI / 180))
+    const y = 250 + radius * Math.sin((angle - 90) * (Math.PI / 180))
+    const modifier = getModifier(stats[stat.id])
+
+    return (
+      <g className="transition-transform duration-300 hover:scale-105">
+        {/* Connection Line */}
+        <line
+          x1="250"
+          y1="250"
+          x2={x}
+          y2={y}
+          className={`
+            stroke-amber-400/20 stroke-1
+            ${canIncreaseStat(stat) ? 'animate-pulse-subtle' : ''}
+          `}
+        />
+
+        {/* Stat Controls */}
+        <g transform={`translate(${x}, ${y})`}>
+          {/* Background Circle */}
+          <circle
+            r="30"
+            className="fill-fantasy-800 stroke-amber-400/30 stroke-2"
+          />
+
+          {/* Stat Value */}
+          <text
+            y="-5"
+            textAnchor="middle"
+            className="fill-white text-lg font-bold"
+          >
+            {stats[stat.id]}
+          </text>
+
+          {/* Modifier */}
+          <text
+            y="15"
+            textAnchor="middle"
+            className={cn(
+              "text-sm",
+              modifier >= 0 ? "fill-green-400" : "fill-red-400"
+            )}
+          >
+            {modifier >= 0 ? `+${modifier}` : modifier}
+          </text>
+
+          {/* Control Buttons */}
+          <g className="opacity-0 hover:opacity-100 transition-opacity">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute -left-8 top-0 h-6 w-6"
+              onClick={() => onStatChange(stat.id, false)}
+              disabled={!canDecreaseStat(stat)}
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute -right-8 top-0 h-6 w-6"
+              onClick={() => onStatChange(stat.id, true)}
+              disabled={!canIncreaseStat(stat)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </g>
+        </g>
+
+        {/* Stat Label */}
+        <text
+          x={x}
+          y={y + 40}
+          textAnchor="middle"
+          className="fill-amber-400/80 text-sm font-medieval"
+        >
+          {stat.label}
+        </text>
+      </g>
+    )
+  }
+
+  const baseStats = [
+    { id: 'strength', label: 'Strength' },
+    { id: 'dexterity', label: 'Dexterity' },
+    { id: 'constitution', label: 'Constitution' },
+    { id: 'intelligence', label: 'Intelligence' },
+    { id: 'wisdom', label: 'Wisdom' },
+    { id: 'charisma', label: 'Charisma' }
+  ]
 
   return (
     <div className={cn("relative w-full h-full", className)}>
       <svg viewBox="0 0 500 500" className="w-full h-full">
-        {/* Base Circles */}
+        {/* Decorative Circles */}
         <circle 
           cx="250" cy="250" r="240" 
           className="fill-none stroke-amber-400/20 stroke-2"
@@ -46,118 +145,43 @@ export function MagicalCircle({
           cx="250" cy="250" r="200" 
           className="fill-none stroke-amber-400/20 stroke-2 animate-spin-slow"
         />
-        
-        {/* Magical Runes */}
-        <g className="animate-spin-reverse-slow">
-          {[...Array(24)].map((_, i) => (
-            <g key={i} transform={`rotate(${i * 15} 250 250)`}>
-              <path 
-                d={`M 250 30 L 260 50 L 240 50 Z`} 
-                className="fill-amber-400/20"
-              />
-            </g>
-          ))}
-        </g>
 
-        {/* Stat Nodes */}
-        {getStatNodes().map((stat, index) => {
-          const angle = (index * 360) / getStatNodes().length
-          const radius = 180
-          const x = 250 + radius * Math.cos((angle - 90) * (Math.PI / 180))
-          const y = 250 + radius * Math.sin((angle - 90) * (Math.PI / 180))
-
-          return (
-            <g
-              key={stat.id}
-              onClick={() => onStatClick(stat)}
-              className={`
-                cursor-pointer transition-opacity duration-500
-                opacity-0 animate-fade-in
-              `}
-              style={{
-                animationDelay: `${index * 100}ms`
-              }}
-            >
-              {/* Connecting Line */}
-              <line
-                x1="250"
-                y1="250"
-                x2={x}
-                y2={y}
-                className={`stroke-${stat.color}-400/20 stroke-1`}
-              />
-
-              {/* Stat Circle */}
-              <circle
-                cx={x}
-                cy={y}
-                r="20"
-                className={`
-                  fill-${stat.color}-500/20 stroke-${stat.color}-400
-                  hover:fill-${stat.color}-500/40 hover:stroke-${stat.color}-300
-                  transition-all duration-300
-                `}
-              />
-              
-              {/* Stat Value */}
-              <text
-                x={x}
-                y={y}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                className="fill-white text-sm font-bold"
-              >
-                {stat.value}
-              </text>
-
-              {/* Stat Label */}
-              <text
-                x={x}
-                y={y + 30}
-                textAnchor="middle"
-                className="fill-gray-400 text-xs"
-              >
-                {stat.label}
-              </text>
-            </g>
-          )
-        })}
-
-        {/* Center Piece */}
-        <circle
-          cx="250"
-          cy="250"
-          r="40"
-          className="fill-fantasy-800 stroke-amber-400/50 stroke-2"
-        />
-        <text
-          x="250"
-          y="250"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          className="fill-amber-400 text-sm font-medieval"
-        >
-          {selectedTab.toUpperCase()}
-        </text>
-      </svg>
-
-      {/* Floating Particles */}
-      <div className="absolute inset-0 pointer-events-none">
-        {activeStats.map((stat, index) => (
-          <div
-            key={`particle-${index}`}
-            className={`
-              absolute w-1 h-1 rounded-full
-              bg-${stat.color}-400
-              animate-float-up
-            `}
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
+        {/* Stats */}
+        {baseStats.map((stat, index) => (
+          <StatNode
+            key={stat.id}
+            stat={stat}
+            index={index}
+            total={baseStats.length}
           />
         ))}
-      </div>
+
+        {/* Center Display */}
+        <g className="pointer-events-none">
+          <circle
+            cx="250"
+            cy="250"
+            r="50"
+            className="fill-fantasy-800 stroke-amber-400/50 stroke-2"
+          />
+          <text
+            x="250"
+            y="240"
+            textAnchor="middle"
+            className="fill-amber-400 text-lg font-medieval"
+          >
+            Points
+          </text>
+          <text
+            x="250"
+            y="265"
+            textAnchor="middle"
+            className="fill-white text-xl font-bold"
+          >
+            {pointsRemaining}
+          </text>
+        </g>
+      </svg>
     </div>
   )
 }

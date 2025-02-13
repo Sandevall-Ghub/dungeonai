@@ -2,137 +2,49 @@
 
 import { useState } from "react"
 import { MagicalCircle } from "@/components/ui/magical-circle"
-import { Card } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { 
-  User, Scroll, Shield, Book, 
-  ChevronLeft, Star
-} from "lucide-react"
+import { Alert } from "@/components/ui/alert"
+import { InfoCircled } from "lucide-react"
 
 export default function CharacterPage() {
-  const [selectedTab, setSelectedTab] = useState('character')
-  const [availableAP] = useState(10)
   const [stats, setStats] = useState({
-    // Character Stats
-    strength: 10,
-    dexterity: 12,
-    constitution: 14,
-    intelligence: 16,
-    wisdom: 13,
-    charisma: 15,
-    // Skill Stats
-    combat: 5,
-    magic: 7,
-    stealth: 4,
+    strength: 8,
+    dexterity: 8,
+    constitution: 8,
+    intelligence: 8,
+    wisdom: 8,
+    charisma: 8
   })
 
-  const handleStatClick = (stat) => {
-    // Show stat modification dialog or tooltip
-    console.log(`Clicked stat: ${stat.label}`)
-  }
+  const TOTAL_POINTS = 27
+  const usedPoints = Object.values(stats).reduce((total, value) => {
+    const pointCosts = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 }
+    return total + pointCosts[value]
+  }, 0)
 
-  const NavigationButton = ({ icon: Icon, label, value }) => (
-    <button
-      onClick={() => setSelectedTab(value)}
-      className={`
-        group relative w-full px-8 py-4
-        flex items-center gap-3
-        font-medieval text-lg
-        ${selectedTab === value ? 'text-amber-400' : 'text-gray-400'}
-      `}
-    >
-      {/* Ornate Background */}
-      <div className={`
-        absolute inset-0 
-        ${selectedTab === value ? 'bg-gradient-to-r from-amber-500/20 to-transparent' : ''}
-      `} />
-      
-      {/* Left Border */}
-      <div className={`
-        absolute left-0 top-2 bottom-2 w-1
-        ${selectedTab === value ? 'bg-amber-400' : ''}
-      `} />
-      
-      {/* Ornate Edges */}
-      <div className={`
-        absolute left-0 top-0 w-16 h-1
-        ${selectedTab === value ? 'bg-amber-400/20' : ''}
-      `} />
-      <div className={`
-        absolute left-0 bottom-0 w-16 h-1
-        ${selectedTab === value ? 'bg-amber-400/20' : ''}
-      `} />
-      
-      <Icon className={`
-        h-5 w-5
-        ${selectedTab === value ? 'text-amber-400' : 'text-gray-500'}
-      `} />
-      {label}
-    </button>
-  )
+  const handleStatChange = (statId, increase) => {
+    setStats(prev => ({
+      ...prev,
+      [statId]: prev[statId] + (increase ? 1 : -1)
+    }))
+  }
 
   return (
     <div className="min-h-screen bg-fantasy-900 text-white">
-      {/* Background Effects */}
-      <div className="fixed inset-0 bg-[url('/images/dark-texture.png')] opacity-20" />
-      
-      <div className="relative z-10 flex h-screen">
-        {/* Left Navigation */}
-        <div className="w-80 bg-fantasy-800/95 border-r border-fantasy-700">
-          {/* Back Button */}
-          <button className="flex items-center gap-2 p-6 text-gray-400 hover:text-amber-400">
-            <ChevronLeft className="h-5 w-5" />
-            Back
-          </button>
-          
-          <div className="space-y-1 pt-4">
-            <NavigationButton icon={User} label="Character" value="character" />
-            <NavigationButton icon={Scroll} label="Skills" value="skills" />
-            <NavigationButton icon={Shield} label="Equipment" value="equipment" />
-            <NavigationButton icon={Book} label="Story" value="story" />
-          </div>
-        </div>
+      <div className="container mx-auto p-4">
+        <Alert className="mb-4 bg-fantasy-800 border-amber-400/20">
+          <InfoCircled className="h-4 w-4" />
+          <p className="text-sm">
+            Use the point buy system to allocate your ability scores. 
+            You have {TOTAL_POINTS - usedPoints} points remaining.
+          </p>
+        </Alert>
 
-        {/* Main Content */}
-        <div className="flex-1 relative">
-          {/* AP Display */}
-          <div className="absolute top-6 right-6 flex items-center gap-2">
-            <div className="px-4 py-2 bg-fantasy-800/90 rounded-full border border-fantasy-700">
-              <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 text-amber-400" />
-                <span className="text-amber-400 font-medieval">
-                  Available AP {availableAP}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content Area */}
-          <div className="flex-1 relative">
-            {/* Magical Circle */}
-            <div className="absolute right-20 top-20 w-[600px] h-[600px]">
-              <MagicalCircle
-                selectedTab={selectedTab}
-                stats={stats}
-                onStatClick={handleStatClick}
-                className="opacity-90"
-              />
-            </div>
-
-            {/* Dynamic Content Based on Selected Tab */}
-            <div className="relative z-10 p-8">
-              {/* Add your tab-specific content here */}
-            </div>
-          </div>
-
-          {/* Content Area */}
-          <ScrollArea className="h-screen p-8">
-            <div className="max-w-2xl space-y-6">
-              <Card className="p-6 bg-fantasy-800/90 border-fantasy-700">
-                {/* Content based on selectedTab */}
-              </Card>
-            </div>
-          </ScrollArea>
+        <div className="relative aspect-square max-w-2xl mx-auto">
+          <MagicalCircle
+            stats={stats}
+            onStatChange={handleStatChange}
+            pointsRemaining={TOTAL_POINTS - usedPoints}
+          />
         </div>
       </div>
     </div>
