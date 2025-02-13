@@ -3,9 +3,23 @@
 import { useState } from "react"
 import { MagicalCircle } from "@/components/ui/magical-circle"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card } from "@/components/ui/card"
+
+const RACE_BONUSES = {
+  human: { strength: 1, dexterity: 1, constitution: 1, intelligence: 1, wisdom: 1, charisma: 1 },
+  elf: { dexterity: 2, intelligence: 1 },
+  dwarf: { constitution: 2, strength: 1 }
+}
+
+const CLASS_RECOMMENDATIONS = {
+  fighter: { primaryStats: ['strength', 'constitution'], recommendedStats: { strength: 15, constitution: 14 } },
+  wizard: { primaryStats: ['intelligence', 'dexterity'], recommendedStats: { intelligence: 15, dexterity: 14 } },
+  rogue: { primaryStats: ['dexterity', 'intelligence'], recommendedStats: { dexterity: 15, intelligence: 14 } },
+  cleric: { primaryStats: ['wisdom', 'constitution'], recommendedStats: { wisdom: 15, constitution: 14 } }
+}
 
 export default function CharacterPage() {
-  const [stats, setStats] = useState({
+  const [baseStats, setBaseStats] = useState({
     strength: 8,
     dexterity: 8,
     constitution: 8,
@@ -13,54 +27,47 @@ export default function CharacterPage() {
     wisdom: 8,
     charisma: 8
   })
-  const [characterClass, setCharacterClass] = useState("")
   const [race, setRace] = useState("")
-
-  const TOTAL_POINTS = 27
-  const usedPoints = Object.values(stats).reduce((total, value) => {
-    const pointCosts = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 }
-    return total + pointCosts[value]
-  }, 0)
+  const [characterClass, setCharacterClass] = useState("")
 
   return (
     <div className="min-h-screen bg-fantasy-900 text-white">
       <div className="container mx-auto p-4">
         <div className="flex gap-4 mb-8">
-          <Select value={characterClass} onValueChange={setCharacterClass}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Select Class" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="fighter">Fighter</SelectItem>
-              <SelectItem value="wizard">Wizard</SelectItem>
-              <SelectItem value="rogue">Rogue</SelectItem>
-              <SelectItem value="cleric">Cleric</SelectItem>
-            </SelectContent>
-          </Select>
-
           <Select value={race} onValueChange={setRace}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-48 bg-fantasy-800 border-fantasy-700">
               <SelectValue placeholder="Select Race" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="human">Human</SelectItem>
-              <SelectItem value="elf">Elf</SelectItem>
-              <SelectItem value="dwarf">Dwarf</SelectItem>
+              {Object.keys(RACE_BONUSES).map(raceName => (
+                <SelectItem key={raceName} value={raceName}>
+                  {raceName.charAt(0).toUpperCase() + raceName.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={characterClass} onValueChange={setCharacterClass}>
+            <SelectTrigger className="w-48 bg-fantasy-800 border-fantasy-700">
+              <SelectValue placeholder="Select Class" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.keys(CLASS_RECOMMENDATIONS).map(className => (
+                <SelectItem key={className} value={className}>
+                  {className.charAt(0).toUpperCase() + className.slice(1)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         <div className="relative aspect-square max-w-2xl mx-auto">
           <MagicalCircle
-            stats={stats}
-            characterClass={characterClass}
+            baseStats={baseStats}
             race={race}
-            pointsRemaining={TOTAL_POINTS - usedPoints}
-            onStatChange={(statId, increase) => {
-              setStats(prev => ({
-                ...prev,
-                [statId]: prev[statId] + (increase ? 1 : -1)
-              }))
+            characterClass={characterClass}
+            onStatChange={(statId, value) => {
+              setBaseStats(prev => ({...prev, [statId]: value}))
             }}
           />
         </div>

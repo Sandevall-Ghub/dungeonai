@@ -2,46 +2,30 @@
 
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
-import { validateStats } from "@/lib/stat-validation"
+import { RACE_BONUSES, CLASS_RECOMMENDATIONS, calculateTotalStats } from "@/lib/stat-validation"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Alert } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
 
 export function MagicalCircle({ 
-  stats, 
-  onStatChange,
-  characterClass,
+  baseStats, 
   race,
+  characterClass,
+  onStatChange,
   className = "" 
 }) {
-  const [validation, setValidation] = useState(null)
-
-  useEffect(() => {
-    const result = validateStats(stats, characterClass, race)
-    setValidation(result)
-  }, [stats, characterClass, race])
-
-  const getModifier = (value) => {
-    return Math.floor((value - 10) / 2)
-  }
-
-  const baseStats = [
-    { id: 'strength', label: 'Strength' },
-    { id: 'dexterity', label: 'Dexterity' },
-    { id: 'constitution', label: 'Constitution' },
-    { id: 'intelligence', label: 'Intelligence' },
-    { id: 'wisdom', label: 'Wisdom' },
-    { id: 'charisma', label: 'Charisma' }
-  ]
-
+  const totalStats = calculateTotalStats(baseStats, race)
+  
   const StatNode = ({ stat, index, total }) => {
     const angle = (index * 360) / total
     const radius = 180
     const x = 250 + radius * Math.cos((angle - 90) * (Math.PI / 180))
     const y = 250 + radius * Math.sin((angle - 90) * (Math.PI / 180))
-    const modifier = getModifier(stats[stat.id])
-
-    const hasError = validation?.errors[stat.id]
-    const hasWarning = validation?.warnings[stat.id]
+    
+    const baseValue = baseStats[stat.id]
+    const totalValue = totalStats[stat.id]
+    const bonus = totalValue - baseValue
+    const isRecommended = characterClass && 
+      CLASS_RECOMMENDATIONS[characterClass]?.primary === stat.id
 
     return (
       <TooltipProvider>
@@ -56,75 +40,81 @@ export function MagicalCircle({
                 y2={y}
                 className={cn(
                   "stroke-1",
-                  hasError ? "stroke-red-400/50" :
-                  hasWarning ? "stroke-yellow-400/50" :
-                  "stroke-amber-400/20"
+                  isRecommended ? "stroke-amber-400/50" : "stroke-gray-400/20"
                 )}
               />
 
-              {/* Stat Controls */}
-              <g transform={`translate(${x}, ${y})`}>
-                {/* Background Circle */}
-                <circle
-                  r="30"
-                  className={cn(
-                    "transition-colors duration-300",
-                    hasError ? "fill-red-900/20 stroke-red-400" :
-                    hasWarning ? "fill-yellow-900/20 stroke-yellow-400" :
-                    "fill-fantasy-800 stroke-amber-400/30 stroke-2"
-                  )}
-                />
+              {/* Stat Circle */}
+              <circle
+                cx={x}
+                cy={y}
+                r="35"
+                className={cn(
+                  "fill-fantasy-800 transition-all duration-300",
+                  isRecommended ? "stroke-amber-400" : "stroke-gray-400/50",
+                  bonus > 0 && "ring-2 ring-blue-400/50"
+                )}
+              />
 
-                {/* Stat Value */}
-                <text
-                  y="-5"
-                  textAnchor="middle"
-                  className={cn(
-                    "text-lg font-bold",
-                    hasError ? "fill-red-400" :
-                    hasWarning ? "fill-yellow-400" :
-                    "fill-white"
-                  )}
-                >
-                  {stats[stat.id]}
-                </text>
+              {/* Base Value */}
+              <text
+                x={x}
+                y={y - 8}
+                textAnchor="middle"
+                className="fill-white text-lg font-bold"
+              >
+                {baseValue}
+              </text>
 
-                {/* Modifier */}
+              {/* Racial Bonus */}
+              {bonus > 0 && (
                 <text
-                  y="15"
+                  x={x}
+                  y={y + 12}
                   textAnchor="middle"
-                  className={cn(
-                    "text-sm",
-                    modifier >= 0 ? "fill-green-400" : "fill-red-400"
-                  )}
+                  className="fill-blue-400 text-sm font-bold"
                 >
-                  {modifier >= 0 ? `+${modifier}` : modifier}
+                  +{bonus}
                 </text>
-              </g>
+              )}
 
               {/* Stat Label */}
               <text
                 x={x}
                 y={y + 40}
                 textAnchor="middle"
-                className="fill-amber-400/80 text-sm font-medieval"
+                className={cn(
+                  "text-sm",
+                  isRecommended ? "fill-amber-400" : "fill-gray-400"
+                )}
               >
                 {stat.label}
               </text>
             </g>
           </TooltipTrigger>
           <TooltipContent>
-            <div className="space-y-1">
-              <p className="font-bold">{stat.label}</p>
-              {hasError && (
-                <p className="text-red-400 text-sm">{validation.errors[stat.id]}</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold">{stat.label}</span>
+                <span className="text-sm">
+                  Total: {totalValue}
+                </span>
+              </div>
+              {bonus > 0 && (
+                <Badge className="bg-blue-500/20 text-blue-400">
+                  +{bonus} from {race}
+                </Badge>
               )}
-              {hasWarning && (
-                <p className="text-yellow-400 text-sm">{validation.warnings[stat.id]}</p>
+              {isRecommended && (
+                <Badge className="bg-amber-500/20 text-amber-400">
+                  Recommended for {characterClass}
+                </Badge>
               )}
-              {validation?.suggestions.map((suggestion, i) => (
-                <p key={i} className="text-gray-400 text-sm">{suggestion}</p>
-              ))}
+              {CLASS_RECOMMENDATIONS[characterClass]?.description && (
+                <p className="text-sm text-gray-400">
+                  {CLASS_RECOMMENDATIONS[characterClass].description}
+                </p>
+              )}
             </div>
           </TooltipContent>
         </Tooltip>
@@ -134,19 +124,14 @@ export function MagicalCircle({
 
   return (
     <div className={cn("relative w-full h-full", className)}>
-      {/* Validation Messages */}
-      {validation && !validation.isValid && (
-        <Alert className="absolute top-0 left-0 right-0 bg-red-900/20 border-red-400/50">
-          <p className="text-red-400">Please fix the following issues:</p>
-          <ul className="list-disc list-inside">
-            {Object.values(validation.errors).map((error, i) => (
-              <li key={i} className="text-sm text-red-300">{error}</li>
-            ))}
-          </ul>
-        </Alert>
+      {race && RACE_BONUSES[race] && (
+        <div className="absolute top-4 left-4 right-4">
+          <Badge className="w-full justify-center bg-blue-500/20 text-blue-400">
+            {RACE_BONUSES[race].description}
+          </Badge>
+        </div>
       )}
 
-      {/* Magical Circle SVG */}
       <svg viewBox="0 0 500 500" className="w-full h-full">
         {/* Decorative Circles */}
         <circle 
@@ -157,14 +142,14 @@ export function MagicalCircle({
           cx="250" cy="250" r="200" 
           className="fill-none stroke-amber-400/20 stroke-2 animate-spin-slow"
         />
-
+        
         {/* Stats */}
-        {baseStats.map((stat, index) => (
+        {Object.entries(baseStats).map(([id, _], index) => (
           <StatNode
-            key={stat.id}
-            stat={stat}
+            key={id}
+            stat={{ id, label: id.charAt(0).toUpperCase() + id.slice(1) }}
             index={index}
-            total={baseStats.length}
+            total={Object.keys(baseStats).length}
           />
         ))}
 
@@ -182,18 +167,15 @@ export function MagicalCircle({
             textAnchor="middle"
             className="fill-amber-400 text-lg font-medieval"
           >
-            Validation
+            Character
           </text>
           <text
             x="250"
             y="265"
             textAnchor="middle"
-            className={cn(
-              "text-xl font-bold",
-              validation?.isValid ? "fill-green-400" : "fill-red-400"
-            )}
+            className="text-xl font-bold fill-amber-400"
           >
-            {validation?.isValid ? "Valid" : "Invalid"}
+            {characterClass} {race}
           </text>
         </g>
       </svg>
