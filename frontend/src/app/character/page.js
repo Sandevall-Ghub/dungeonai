@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Shield, Sword, Brain, Heart } from "lucide-react"
 import { PDFHandler } from "./pdf-handler"
+import { FileDropzone } from "./file-dropzone"
 import Link from "next/link"
 
 export default function CharacterSheet() {
@@ -58,6 +59,9 @@ export default function CharacterSheet() {
 
       <ScrollArea className="h-[calc(100vh-4rem)]">
         <div className="p-4 space-y-6">
+          {/* Add FileDropzone at the top */}
+          <FileDropzone />
+
           {/* Character Header */}
           <Card className="p-6 bg-gray-800 space-y-4">
             <div className="flex items-center gap-4">
