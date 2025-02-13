@@ -2,287 +2,123 @@
 
 import { useState } from "react"
 import { BackButton } from "@/components/ui/back-button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Slider } from "@/components/ui/slider"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { DndMechanicsCard, DiceRoller, RuleReference } from "@/components/ui/dnd-mechanics"
 import { 
-  Sword, Shield, Scroll, Heart, Brain, Crown, 
-  Palette, Book, Feather, User
+  User, Scroll, Shield, Book, 
+  Flame, Star, Magic
 } from "lucide-react"
 
 export default function CharacterPage() {
-  const [character, setCharacter] = useState({
-    basics: {
-      name: "",
-      race: "",
-      class: "",
-      level: 1,
-      alignment: "",
-      background: "",
-    },
-    appearance: {
-      height: 170,
-      build: "medium",
-      eyeColor: "",
-      hairColor: "",
-      distinguishingFeatures: "",
-    },
-    stats: {
-      strength: 10,
-      dexterity: 10,
-      constitution: 10,
-      intelligence: 10,
-      wisdom: 10,
-      charisma: 10,
-    },
-    background: {
-      personality: "",
-      ideals: "",
-      bonds: "",
-      flaws: "",
-      backstory: "",
-    }
-  })
-
-  const StatBlock = ({ label, value, icon: Icon, onChange }) => (
-    <Card className="p-4 bg-[#1a2436] border-[#2a3446] space-y-2">
-      <DndMechanicsCard
-        title={`${label} Check`}
-        description={`${label} represents your character's ${label.toLowerCase()} ability. 
-        The modifier (${Math.floor((value - 10) / 2)}) is added to relevant checks.`}
-      >
-        <div className="flex items-center gap-2">
-          <Icon className="h-5 w-5 text-blue-400" />
-          <Label className="text-sm text-gray-300">{label}</Label>
-        </div>
-      </DndMechanicsCard>
+  const [selectedTab, setSelectedTab] = useState('character')
+  
+  const NavigationButton = ({ icon: Icon, label, value }) => (
+    <button
+      onClick={() => setSelectedTab(value)}
+      className={`
+        w-full group relative flex items-center gap-3 px-6 py-4
+        text-left text-lg font-medium
+        ${selectedTab === value ? 'text-amber-400' : 'text-gray-400'}
+        hover:text-amber-400 transition-colors
+      `}
+    >
+      {/* Ornate Left Border */}
+      <div className={`
+        absolute left-0 top-0 bottom-0 w-1
+        ${selectedTab === value ? 'bg-amber-400' : 'bg-transparent'}
+        transition-colors
+      `} />
       
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-400">Value: {value}</span>
-          <DiceRoller 
-            diceType={20} 
-            modifier={Math.floor((value - 10) / 2)} 
-          />
-        </div>
-        <Slider
-          value={[value]}
-          min={3}
-          max={18}
-          step={1}
-          onValueChange={([newValue]) => onChange(newValue)}
-          className="w-full"
-        />
-      </div>
-    </Card>
+      {/* Hover Effect Background */}
+      <div className={`
+        absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent
+        opacity-0 group-hover:opacity-100
+        ${selectedTab === value ? 'opacity-100' : ''}
+        transition-opacity
+      `} />
+      
+      <Icon className={`
+        h-5 w-5 transition-transform group-hover:scale-110
+        ${selectedTab === value ? 'text-amber-400' : 'text-gray-500'}
+      `} />
+      {label}
+    </button>
   )
 
   return (
-    <div className="min-h-screen bg-[#0d1219] text-white">
-      <BackButton />
+    <div className="relative min-h-screen bg-[#0d1219] text-white overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{
+          backgroundImage: "url('https://sparkstack.app/api/mocks/images?query=dark+fantasy+castle')"
+        }}
+      />
       
-      <div className="container mx-auto p-4 space-y-6">
-        <h1 className="text-3xl font-bold text-center mb-8">Character Creation</h1>
+      {/* Content Layout */}
+      <div className="relative z-10 flex h-screen">
+        {/* Left Navigation Panel */}
+        <div className="w-72 bg-[#0d1219]/90 border-r border-[#2a3446]">
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-amber-400">Character Creation</h1>
+          </div>
+          
+          <div className="space-y-1">
+            <NavigationButton 
+              icon={User} 
+              label="Character" 
+              value="character" 
+            />
+            <NavigationButton 
+              icon={Scroll} 
+              label="Skills" 
+              value="skills" 
+            />
+            <NavigationButton 
+              icon={Shield} 
+              label="Equipment" 
+              value="equipment" 
+            />
+            <NavigationButton 
+              icon={Book} 
+              label="Story" 
+              value="story" 
+            />
+          </div>
+        </div>
 
-        <Tabs defaultValue="basics" className="w-full">
-          <TabsList className="grid grid-cols-4 w-full bg-[#1a2436]">
-            <TabsTrigger value="basics" className="data-[state=active]:bg-red-950">
-              <User className="h-4 w-4 mr-2" />
-              Basics
-            </TabsTrigger>
-            <TabsTrigger value="appearance" className="data-[state=active]:bg-red-950">
-              <Palette className="h-4 w-4 mr-2" />
-              Appearance
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="data-[state=active]:bg-red-950">
-              <Sword className="h-4 w-4 mr-2" />
-              Stats
-            </TabsTrigger>
-            <TabsTrigger value="background" className="data-[state=active]:bg-red-950">
-              <Book className="h-4 w-4 mr-2" />
-              Background
-            </TabsTrigger>
-          </TabsList>
+        {/* Main Content Area */}
+        <div className="flex-1 relative">
+          <BackButton />
+          
+          {/* Top Stats Display */}
+          <div className="absolute top-6 right-6 flex items-center gap-4">
+            <div className="flex items-center gap-2 px-4 py-2 bg-[#1a2436]/90 rounded-full border border-[#2a3446]">
+              <Flame className="h-5 w-5 text-amber-400" />
+              <span className="text-amber-400">AP 10</span>
+            </div>
+          </div>
 
-          <ScrollArea className="h-[calc(100vh-12rem)]">
-            <div className="p-4 space-y-6">
-              <TabsContent value="basics" className="space-y-4">
-                <Card className="p-6 bg-[#1a2436] border-[#2a3446] space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Character Name</Label>
-                      <Input
-                        id="name"
-                        value={character.basics.name}
-                        onChange={(e) => setCharacter({
-                          ...character,
-                          basics: { ...character.basics, name: e.target.value }
-                        })}
-                        className="bg-gray-900"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="class">Class</Label>
-                      <Select
-                        value={character.basics.class}
-                        onValueChange={(value) => setCharacter({
-                          ...character,
-                          basics: { ...character.basics, class: value }
-                        })}
-                      >
-                        <SelectTrigger className="bg-gray-900">
-                          <SelectValue placeholder="Select class" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="fighter">Fighter</SelectItem>
-                          <SelectItem value="wizard">Wizard</SelectItem>
-                          <SelectItem value="rogue">Rogue</SelectItem>
-                          <SelectItem value="cleric">Cleric</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <RuleReference
-                    rule={{
-                      title: "Character Classes",
-                      description: "Your class is your character's calling, defining their abilities and role in the party."
-                    }}
-                  />
+          {/* Skill Tree / Main Content */}
+          <ScrollArea className="h-[calc(100vh-2rem)] p-6">
+            <div className="relative">
+              {/* Magical Circle Background */}
+              <div className="absolute right-0 top-0 w-96 h-96 opacity-20">
+                <div className="absolute inset-0 animate-spin-slow">
+                  {/* Add SVG magical circle here */}
+                </div>
+              </div>
+
+              {/* Content Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+                <Card className="p-6 bg-[#1a2436]/90 border-[#2a3446]">
+                  {/* Add character content based on selectedTab */}
                 </Card>
-              </TabsContent>
-
-              <TabsContent value="appearance" className="space-y-4">
-                <Card className="p-6 bg-gray-800/50 space-y-4">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Build</Label>
-                      <RadioGroup
-                        value={character.appearance.build}
-                        onValueChange={(value) => setCharacter({
-                          ...character,
-                          appearance: { ...character.appearance, build: value }
-                        })}
-                        className="flex space-x-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="slim" id="slim" />
-                          <Label htmlFor="slim">Slim</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="medium" id="medium" />
-                          <Label htmlFor="medium">Medium</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="muscular" id="muscular" />
-                          <Label htmlFor="muscular">Muscular</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Height (cm): {character.appearance.height}</Label>
-                      <Slider
-                        value={[character.appearance.height]}
-                        min={150}
-                        max={200}
-                        step={1}
-                        onValueChange={([value]) => setCharacter({
-                          ...character,
-                          appearance: { ...character.appearance, height: value }
-                        })}
-                      />
-                    </div>
-                  </div>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="stats" className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <StatBlock
-                  label="Strength"
-                  value={character.stats.strength}
-                  icon={Sword}
-                  onChange={(value) => setCharacter({
-                    ...character,
-                    stats: { ...character.stats, strength: value }
-                  })}
-                />
-                <StatBlock
-                  label="Dexterity"
-                  value={character.stats.dexterity}
-                  icon={Feather}
-                  onChange={(value) => setCharacter({
-                    ...character,
-                    stats: { ...character.stats, dexterity: value }
-                  })}
-                />
-                <StatBlock
-                  label="Constitution"
-                  value={character.stats.constitution}
-                  icon={Heart}
-                  onChange={(value) => setCharacter({
-                    ...character,
-                    stats: { ...character.stats, constitution: value }
-                  })}
-                />
-                <StatBlock
-                  label="Intelligence"
-                  value={character.stats.intelligence}
-                  icon={Brain}
-                  onChange={(value) => setCharacter({
-                    ...character,
-                    stats: { ...character.stats, intelligence: value }
-                  })}
-                />
-                <StatBlock
-                  label="Wisdom"
-                  value={character.stats.wisdom}
-                  icon={Scroll}
-                  onChange={(value) => setCharacter({
-                    ...character,
-                    stats: { ...character.stats, wisdom: value }
-                  })}
-                />
-                <StatBlock
-                  label="Charisma"
-                  value={character.stats.charisma}
-                  icon={Crown}
-                  onChange={(value) => setCharacter({
-                    ...character,
-                    stats: { ...character.stats, charisma: value }
-                  })}
-                />
-              </TabsContent>
-
-              <TabsContent value="background" className="space-y-4">
-                <Card className="p-6 bg-gray-800/50 space-y-4">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="backstory">Character Backstory</Label>
-                      <Textarea
-                        id="backstory"
-                        value={character.background.backstory}
-                        onChange={(e) => setCharacter({
-                          ...character,
-                          background: { ...character.background, backstory: e.target.value }
-                        })}
-                        className="bg-gray-900 min-h-[200px]"
-                        placeholder="Tell us your character's story..."
-                      />
-                    </div>
-                  </div>
-                </Card>
-              </TabsContent>
+              </div>
             </div>
           </ScrollArea>
-        </Tabs>
+        </div>
       </div>
     </div>
   )

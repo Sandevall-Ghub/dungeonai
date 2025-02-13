@@ -58,7 +58,12 @@ export default {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+        'fantasy': {
+          900: '#0d1219',
+          800: '#1a2436',
+          700: '#2a3446',
+        }
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -101,8 +106,12 @@ export default {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
         fadeIn: 'fadeIn 0.5s ease-in-out',
-        fireParticle: 'fireParticle 1s ease-out forwards'
-  		}
+        fireParticle: 'fireParticle 1s ease-out forwards',
+        'spin-slow': 'spin 20s linear infinite'
+  		},
+      backgroundImage: {
+        'ornate-border': "url('/images/ornate-border.png')",
+      }
   	}
   },
   plugins: [require("tailwindcss-animate")],
