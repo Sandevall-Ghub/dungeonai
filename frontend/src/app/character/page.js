@@ -1,144 +1,228 @@
 "use client"
 
 import { useState } from "react"
+import { BackButton } from "@/components/ui/back-button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, Shield, Sword, Brain, Heart } from "lucide-react"
-import { PDFHandler } from "./pdf-handler"
-import { FileDropzone } from "./file-dropzone"
-import Link from "next/link"
-import { BackButton } from "@/components/ui/back-button"
+import { Slider } from "@/components/ui/slider"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { 
+  Sword, Shield, Scroll, Heart, Brain, Crown, 
+  Palette, Book, Feather, User
+} from "lucide-react"
 
-export default function CharacterSheet() {
+export default function CharacterPage() {
   const [character, setCharacter] = useState({
-    name: "Eldric Shadowweaver",
-    class: "Wizard",
-    race: "High Elf",
-    level: 5,
-    hp: 28,
-    maxHp: 35,
+    basics: {
+      name: "",
+      race: "",
+      class: "",
+      level: 1,
+      alignment: "",
+      background: "",
+    },
+    appearance: {
+      height: 170,
+      build: "medium",
+      eyeColor: "",
+      hairColor: "",
+      distinguishingFeatures: "",
+    },
     stats: {
       strength: 10,
-      dexterity: 14,
-      constitution: 12,
-      intelligence: 16,
-      wisdom: 13,
-      charisma: 11
+      dexterity: 10,
+      constitution: 10,
+      intelligence: 10,
+      wisdom: 10,
+      charisma: 10,
+    },
+    background: {
+      personality: "",
+      ideals: "",
+      bonds: "",
+      flaws: "",
+      backstory: "",
     }
   })
 
-  const StatBlock = ({ label, value, icon: Icon }) => (
-    <Card className="flex flex-col items-center p-4 bg-gray-800">
-      <Icon className="h-6 w-6 mb-2 text-red-500" />
-      <Label className="text-sm text-gray-400">{label}</Label>
-      <div className="text-2xl font-bold text-white">{value}</div>
-      <div className="text-sm text-gray-400">
-        {Math.floor((value - 10) / 2) >= 0 ? "+" : ""}
-        {Math.floor((value - 10) / 2)}
+  const StatBlock = ({ label, value, icon: Icon, onChange }) => (
+    <Card className="p-4 bg-gray-800/50 space-y-2">
+      <div className="flex items-center gap-2">
+        <Icon className="h-5 w-5 text-red-400" />
+        <Label className="text-sm text-gray-300">{label}</Label>
+      </div>
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-400">Value: {value}</span>
+          <span className="text-gray-400">Modifier: {Math.floor((value - 10) / 2)}</span>
+        </div>
+        <Slider
+          values={[value]}
+          min={3}
+          max={18}
+          step={1}
+          onValueChange={([newValue]) => onChange(newValue)}
+          className="w-full"
+        />
       </div>
     </Card>
   )
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <div className="border-b border-gray-800 p-4 flex items-center justify-between">
-        <div className="flex items-center">
-          <BackButton />
-          <h1 className="text-xl font-bold ml-4">Character Sheet</h1>
-        </div>
-        <PDFHandler />
+      <BackButton />
+      
+      <div className="container mx-auto p-4 space-y-6">
+        <h1 className="text-3xl font-bold text-center mb-8">Character Creation</h1>
+
+        <Tabs defaultValue="basics" className="w-full">
+          <TabsList className="grid grid-cols-4 w-full bg-gray-800">
+            <TabsTrigger value="basics" className="data-[state=active]:bg-red-950">
+              <User className="h-4 w-4 mr-2" />
+              Basics
+            </TabsTrigger>
+            <TabsTrigger value="appearance" className="data-[state=active]:bg-red-950">
+              <Palette className="h-4 w-4 mr-2" />
+              Appearance
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="data-[state=active]:bg-red-950">
+              <Sword className="h-4 w-4 mr-2" />
+              Stats
+            </TabsTrigger>
+            <TabsTrigger value="background" className="data-[state=active]:bg-red-950">
+              <Book className="h-4 w-4 mr-2" />
+              Background
+            </TabsTrigger>
+          </TabsList>
+
+          <ScrollArea className="h-[calc(100vh-12rem)]">
+            <div className="p-4 space-y-6">
+              <TabsContent value="basics" className="space-y-4">
+                <Card className="p-6 bg-gray-800/50 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Character Name</Label>
+                      <Input
+                        id="name"
+                        value={character.basics.name}
+                        onChange={(e) => setCharacter({
+                          ...character,
+                          basics: { ...character.basics, name: e.target.value }
+                        })}
+                        className="bg-gray-900"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="class">Class</Label>
+                      <Select
+                        value={character.basics.class}
+                        onValueChange={(value) => setCharacter({
+                          ...character,
+                          basics: { ...character.basics, class: value }
+                        })}
+                      >
+                        <SelectTrigger className="bg-gray-900">
+                          <SelectValue placeholder="Select class" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fighter">Fighter</SelectItem>
+                          <SelectItem value="wizard">Wizard</SelectItem>
+                          <SelectItem value="rogue">Rogue</SelectItem>
+                          <SelectItem value="cleric">Cleric</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="appearance" className="space-y-4">
+                <Card className="p-6 bg-gray-800/50 space-y-4">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Build</Label>
+                      <RadioGroup
+                        value={character.appearance.build}
+                        onValueChange={(value) => setCharacter({
+                          ...character,
+                          appearance: { ...character.appearance, build: value }
+                        })}
+                        className="flex space-x-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="slim" id="slim" />
+                          <Label htmlFor="slim">Slim</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="medium" id="medium" />
+                          <Label htmlFor="medium">Medium</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="muscular" id="muscular" />
+                          <Label htmlFor="muscular">Muscular</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Height (cm): {character.appearance.height}</Label>
+                      <Slider
+                        values={[character.appearance.height]}
+                        min={150}
+                        max={200}
+                        step={1}
+                        onValueChange={([value]) => setCharacter({
+                          ...character,
+                          appearance: { ...character.appearance, height: value }
+                        })}
+                      />
+                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="stats" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <StatBlock
+                  label="Strength"
+                  value={character.stats.strength}
+                  icon={Sword}
+                  onChange={(value) => setCharacter({
+                    ...character,
+                    stats: { ...character.stats, strength: value }
+                  })}
+                />
+                {/* Add similar StatBlocks for other attributes */}
+              </TabsContent>
+
+              <TabsContent value="background" className="space-y-4">
+                <Card className="p-6 bg-gray-800/50 space-y-4">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="backstory">Character Backstory</Label>
+                      <Textarea
+                        id="backstory"
+                        value={character.background.backstory}
+                        onChange={(e) => setCharacter({
+                          ...character,
+                          background: { ...character.background, backstory: e.target.value }
+                        })}
+                        className="bg-gray-900 min-h-[200px]"
+                        placeholder="Tell us your character's story..."
+                      />
+                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
+            </div>
+          </ScrollArea>
+        </Tabs>
       </div>
-
-      <ScrollArea className="h-[calc(100vh-4rem)]">
-        <div className="p-4 space-y-6">
-          {/* Add FileDropzone at the top */}
-          <FileDropzone />
-
-          {/* Character Header */}
-          <Card className="p-6 bg-gray-800 space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-full bg-red-600 flex items-center justify-center">
-                <span className="text-2xl font-bold">
-                  {character.name.charAt(0)}
-                </span>
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">{character.name}</h2>
-                <p className="text-gray-400">
-                  Level {character.level} {character.race} {character.class}
-                </p>
-              </div>
-            </div>
-
-            {/* Health Bar */}
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label>Hit Points</Label>
-                <span>{character.hp} / {character.maxHp}</span>
-              </div>
-              <Progress 
-                value={(character.hp / character.maxHp) * 100} 
-                className="h-3 bg-gray-700"
-              />
-            </div>
-          </Card>
-
-          {/* Ability Scores */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <StatBlock label="Strength" value={character.stats.strength} icon={Sword} />
-            <StatBlock label="Dexterity" value={character.stats.dexterity} icon={Shield} />
-            <StatBlock label="Constitution" value={character.stats.constitution} icon={Heart} />
-            <StatBlock label="Intelligence" value={character.stats.intelligence} icon={Brain} />
-            <StatBlock label="Wisdom" value={character.stats.wisdom} icon={Brain} />
-            <StatBlock label="Charisma" value={character.stats.charisma} icon={Brain} />
-          </div>
-
-          {/* Character Details Tabs */}
-          <Tabs defaultValue="skills" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-800">
-              <TabsTrigger value="skills">Skills</TabsTrigger>
-              <TabsTrigger value="spells">Spells</TabsTrigger>
-              <TabsTrigger value="inventory">Inventory</TabsTrigger>
-            </TabsList>
-            <TabsContent value="skills" className="mt-4">
-              <Card className="bg-gray-800 p-4">
-                <h3 className="font-bold mb-4">Proficiencies</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Arcana</span>
-                    <span className="text-green-500">+5</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>History</span>
-                    <span className="text-green-500">+5</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Investigation</span>
-                    <span className="text-green-500">+5</span>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
-            <TabsContent value="spells">
-              <Card className="bg-gray-800 p-4">
-                <h3 className="font-bold mb-4">Spell Slots</h3>
-                {/* Add spell content here */}
-              </Card>
-            </TabsContent>
-            <TabsContent value="inventory">
-              <Card className="bg-gray-800 p-4">
-                <h3 className="font-bold mb-4">Equipment</h3>
-                {/* Add inventory content here */}
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </ScrollArea>
     </div>
   )
 }
