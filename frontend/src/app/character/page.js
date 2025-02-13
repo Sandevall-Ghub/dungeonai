@@ -2,8 +2,7 @@
 
 import { useState } from "react"
 import { MagicalCircle } from "@/components/ui/magical-circle"
-import { Alert } from "@/components/ui/alert"
-import { InfoCircled } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function CharacterPage() {
   const [stats, setStats] = useState({
@@ -14,6 +13,8 @@ export default function CharacterPage() {
     wisdom: 8,
     charisma: 8
   })
+  const [characterClass, setCharacterClass] = useState("")
+  const [race, setRace] = useState("")
 
   const TOTAL_POINTS = 27
   const usedPoints = Object.values(stats).reduce((total, value) => {
@@ -21,29 +22,46 @@ export default function CharacterPage() {
     return total + pointCosts[value]
   }, 0)
 
-  const handleStatChange = (statId, increase) => {
-    setStats(prev => ({
-      ...prev,
-      [statId]: prev[statId] + (increase ? 1 : -1)
-    }))
-  }
-
   return (
     <div className="min-h-screen bg-fantasy-900 text-white">
       <div className="container mx-auto p-4">
-        <Alert className="mb-4 bg-fantasy-800 border-amber-400/20">
-          <InfoCircled className="h-4 w-4" />
-          <p className="text-sm">
-            Use the point buy system to allocate your ability scores. 
-            You have {TOTAL_POINTS - usedPoints} points remaining.
-          </p>
-        </Alert>
+        <div className="flex gap-4 mb-8">
+          <Select value={characterClass} onValueChange={setCharacterClass}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Select Class" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fighter">Fighter</SelectItem>
+              <SelectItem value="wizard">Wizard</SelectItem>
+              <SelectItem value="rogue">Rogue</SelectItem>
+              <SelectItem value="cleric">Cleric</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={race} onValueChange={setRace}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Select Race" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="human">Human</SelectItem>
+              <SelectItem value="elf">Elf</SelectItem>
+              <SelectItem value="dwarf">Dwarf</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         <div className="relative aspect-square max-w-2xl mx-auto">
           <MagicalCircle
             stats={stats}
-            onStatChange={handleStatChange}
+            characterClass={characterClass}
+            race={race}
             pointsRemaining={TOTAL_POINTS - usedPoints}
+            onStatChange={(statId, increase) => {
+              setStats(prev => ({
+                ...prev,
+                [statId]: prev[statId] + (increase ? 1 : -1)
+              }))
+            }}
           />
         </div>
       </div>

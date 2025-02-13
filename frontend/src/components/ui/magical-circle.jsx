@@ -2,126 +2,26 @@
 
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
-import { Tooltip } from "@/components/ui/tooltip"
-import { Button } from "@/components/ui/button"
-import { Plus, Minus } from "lucide-react"
+import { validateStats } from "@/lib/stat-validation"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Alert } from "@/components/ui/alert"
 
 export function MagicalCircle({ 
   stats, 
   onStatChange,
-  pointsRemaining,
+  characterClass,
+  race,
   className = "" 
 }) {
-  // D&D 5e Point Buy Rules
-  const POINT_COSTS = {
-    8: 0, 9: 1, 10: 2, 11: 3, 12: 4,
-    13: 5, 14: 7, 15: 9
-  }
+  const [validation, setValidation] = useState(null)
 
-  const getPointCost = (currentValue, increase = true) => {
-    if (increase) {
-      return POINT_COSTS[currentValue + 1] - POINT_COSTS[currentValue]
-    }
-    return POINT_COSTS[currentValue] - POINT_COSTS[currentValue - 1]
-  }
-
-  const canIncreaseStat = (stat) => {
-    const cost = getPointCost(stats[stat.id])
-    return stats[stat.id] < 15 && pointsRemaining >= cost
-  }
-
-  const canDecreaseStat = (stat) => {
-    return stats[stat.id] > 8
-  }
+  useEffect(() => {
+    const result = validateStats(stats, characterClass, race)
+    setValidation(result)
+  }, [stats, characterClass, race])
 
   const getModifier = (value) => {
     return Math.floor((value - 10) / 2)
-  }
-
-  const StatNode = ({ stat, index, total }) => {
-    const angle = (index * 360) / total
-    const radius = 180
-    const x = 250 + radius * Math.cos((angle - 90) * (Math.PI / 180))
-    const y = 250 + radius * Math.sin((angle - 90) * (Math.PI / 180))
-    const modifier = getModifier(stats[stat.id])
-
-    return (
-      <g className="transition-transform duration-300 hover:scale-105">
-        {/* Connection Line */}
-        <line
-          x1="250"
-          y1="250"
-          x2={x}
-          y2={y}
-          className={`
-            stroke-amber-400/20 stroke-1
-            ${canIncreaseStat(stat) ? 'animate-pulse-subtle' : ''}
-          `}
-        />
-
-        {/* Stat Controls */}
-        <g transform={`translate(${x}, ${y})`}>
-          {/* Background Circle */}
-          <circle
-            r="30"
-            className="fill-fantasy-800 stroke-amber-400/30 stroke-2"
-          />
-
-          {/* Stat Value */}
-          <text
-            y="-5"
-            textAnchor="middle"
-            className="fill-white text-lg font-bold"
-          >
-            {stats[stat.id]}
-          </text>
-
-          {/* Modifier */}
-          <text
-            y="15"
-            textAnchor="middle"
-            className={cn(
-              "text-sm",
-              modifier >= 0 ? "fill-green-400" : "fill-red-400"
-            )}
-          >
-            {modifier >= 0 ? `+${modifier}` : modifier}
-          </text>
-
-          {/* Control Buttons */}
-          <g className="opacity-0 hover:opacity-100 transition-opacity">
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute -left-8 top-0 h-6 w-6"
-              onClick={() => onStatChange(stat.id, false)}
-              disabled={!canDecreaseStat(stat)}
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute -right-8 top-0 h-6 w-6"
-              onClick={() => onStatChange(stat.id, true)}
-              disabled={!canIncreaseStat(stat)}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </g>
-        </g>
-
-        {/* Stat Label */}
-        <text
-          x={x}
-          y={y + 40}
-          textAnchor="middle"
-          className="fill-amber-400/80 text-sm font-medieval"
-        >
-          {stat.label}
-        </text>
-      </g>
-    )
   }
 
   const baseStats = [
@@ -133,8 +33,120 @@ export function MagicalCircle({
     { id: 'charisma', label: 'Charisma' }
   ]
 
+  const StatNode = ({ stat, index, total }) => {
+    const angle = (index * 360) / total
+    const radius = 180
+    const x = 250 + radius * Math.cos((angle - 90) * (Math.PI / 180))
+    const y = 250 + radius * Math.sin((angle - 90) * (Math.PI / 180))
+    const modifier = getModifier(stats[stat.id])
+
+    const hasError = validation?.errors[stat.id]
+    const hasWarning = validation?.warnings[stat.id]
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <g className="transition-transform duration-300 hover:scale-105">
+              {/* Connection Line */}
+              <line
+                x1="250"
+                y1="250"
+                x2={x}
+                y2={y}
+                className={cn(
+                  "stroke-1",
+                  hasError ? "stroke-red-400/50" :
+                  hasWarning ? "stroke-yellow-400/50" :
+                  "stroke-amber-400/20"
+                )}
+              />
+
+              {/* Stat Controls */}
+              <g transform={`translate(${x}, ${y})`}>
+                {/* Background Circle */}
+                <circle
+                  r="30"
+                  className={cn(
+                    "transition-colors duration-300",
+                    hasError ? "fill-red-900/20 stroke-red-400" :
+                    hasWarning ? "fill-yellow-900/20 stroke-yellow-400" :
+                    "fill-fantasy-800 stroke-amber-400/30 stroke-2"
+                  )}
+                />
+
+                {/* Stat Value */}
+                <text
+                  y="-5"
+                  textAnchor="middle"
+                  className={cn(
+                    "text-lg font-bold",
+                    hasError ? "fill-red-400" :
+                    hasWarning ? "fill-yellow-400" :
+                    "fill-white"
+                  )}
+                >
+                  {stats[stat.id]}
+                </text>
+
+                {/* Modifier */}
+                <text
+                  y="15"
+                  textAnchor="middle"
+                  className={cn(
+                    "text-sm",
+                    modifier >= 0 ? "fill-green-400" : "fill-red-400"
+                  )}
+                >
+                  {modifier >= 0 ? `+${modifier}` : modifier}
+                </text>
+              </g>
+
+              {/* Stat Label */}
+              <text
+                x={x}
+                y={y + 40}
+                textAnchor="middle"
+                className="fill-amber-400/80 text-sm font-medieval"
+              >
+                {stat.label}
+              </text>
+            </g>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div className="space-y-1">
+              <p className="font-bold">{stat.label}</p>
+              {hasError && (
+                <p className="text-red-400 text-sm">{validation.errors[stat.id]}</p>
+              )}
+              {hasWarning && (
+                <p className="text-yellow-400 text-sm">{validation.warnings[stat.id]}</p>
+              )}
+              {validation?.suggestions.map((suggestion, i) => (
+                <p key={i} className="text-gray-400 text-sm">{suggestion}</p>
+              ))}
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
+  }
+
   return (
     <div className={cn("relative w-full h-full", className)}>
+      {/* Validation Messages */}
+      {validation && !validation.isValid && (
+        <Alert className="absolute top-0 left-0 right-0 bg-red-900/20 border-red-400/50">
+          <p className="text-red-400">Please fix the following issues:</p>
+          <ul className="list-disc list-inside">
+            {Object.values(validation.errors).map((error, i) => (
+              <li key={i} className="text-sm text-red-300">{error}</li>
+            ))}
+          </ul>
+        </Alert>
+      )}
+
+      {/* Magical Circle SVG */}
       <svg viewBox="0 0 500 500" className="w-full h-full">
         {/* Decorative Circles */}
         <circle 
@@ -170,15 +182,18 @@ export function MagicalCircle({
             textAnchor="middle"
             className="fill-amber-400 text-lg font-medieval"
           >
-            Points
+            Validation
           </text>
           <text
             x="250"
             y="265"
             textAnchor="middle"
-            className="fill-white text-xl font-bold"
+            className={cn(
+              "text-xl font-bold",
+              validation?.isValid ? "fill-green-400" : "fill-red-400"
+            )}
           >
-            {pointsRemaining}
+            {validation?.isValid ? "Valid" : "Invalid"}
           </text>
         </g>
       </svg>
