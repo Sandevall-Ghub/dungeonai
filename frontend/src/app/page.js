@@ -3,46 +3,15 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Slider } from "@/components/ui/slider"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Volume2, VolumeX, Settings, PlayCircle, Save, FileDown, Power } from "lucide-react"
-import Link from "next/link"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { FireTransition } from "@/components/ui/fire-transition"
+import { PlayCircle, UserPlus, BookOpen, Settings, LogOut } from "lucide-react"
 
 export default function Home() {
   const router = useRouter()
-  const [showSettings, setShowSettings] = useState(false)
-  const [volume, setVolume] = useState(80)
   const [showTransition, setShowTransition] = useState(false)
   const [nextRoute, setNextRoute] = useState("")
-  const [settings, setSettings] = useState({
-    music: true,
-    sfx: true,
-    fullscreen: false,
-    autoSave: true
-  })
-
-  const MenuButton = ({ href, onClick, children, variant = "ghost" }) => (
-    <Button
-      variant={variant}
-      className={`
-        w-full max-w-xs text-lg py-6
-        bg-black/20 hover:bg-red-950/30
-        border border-gray-800 hover:border-red-800
-        transform transition-all duration-300
-        hover:scale-105 hover:text-red-400
-        focus:scale-105 focus:text-red-400
-        ${variant === "default" ? "bg-red-950/20" : ""}
-      `}
-      asChild={!!href}
-      onClick={onClick}
-    >
-      {href ? <Link href={href}>{children}</Link> : <div>{children}</div>}
-    </Button>
-  )
+  const [showQuitDialog, setShowQuitDialog] = useState(false)
 
   const handleNavigation = (route) => {
     setNextRoute(route)
@@ -52,6 +21,27 @@ export default function Home() {
   const handleTransitionComplete = () => {
     router.push(nextRoute)
   }
+
+  const MenuButton = ({ icon: Icon, label, onClick, variant = "ghost" }) => (
+    <Button
+      variant={variant}
+      onClick={onClick}
+      className={`
+        w-full max-w-xs text-lg py-8
+        bg-black/20 hover:bg-red-950/30
+        border border-gray-800 hover:border-red-800
+        transform transition-all duration-300
+        hover:scale-105 hover:text-red-400
+        group relative
+        ${variant === "default" ? "bg-red-950/20" : ""}
+      `}
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/5 to-transparent 
+                    translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+      <Icon className="mr-3 h-5 w-5" />
+      {label}
+    </Button>
+  )
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black text-white">
@@ -85,93 +75,55 @@ export default function Home() {
 
         {/* Menu Options */}
         <div className="flex flex-col items-center space-y-4 w-full max-w-xs">
-          <MenuButton 
-            onClick={() => handleNavigation("/game")} 
+          <MenuButton
+            icon={PlayCircle}
+            label="START ADVENTURE"
+            onClick={() => handleNavigation("/game")}
             variant="default"
-          >
-            CONTINUE
-          </MenuButton>
-          <MenuButton 
+          />
+          <MenuButton
+            icon={UserPlus}
+            label="CREATE CHARACTER"
             onClick={() => handleNavigation("/character")}
-          >
-            NEW GAME
-          </MenuButton>
-          <MenuButton onClick={() => setShowSettings(true)}>
-            SETTINGS
-          </MenuButton>
+          />
+          <MenuButton
+            icon={BookOpen}
+            label="CAMPAIGN"
+            onClick={() => handleNavigation("/campaign")}
+          />
+          <MenuButton
+            icon={Settings}
+            label="SETTINGS"
+            onClick={() => handleNavigation("/settings")}
+          />
+          <MenuButton
+            icon={LogOut}
+            label="QUIT"
+            onClick={() => setShowQuitDialog(true)}
+          />
         </div>
 
-        {/* Settings Dialog */}
-        <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        {/* Quit Dialog */}
+        <Dialog open={showQuitDialog} onOpenChange={setShowQuitDialog}>
           <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold">Settings</DialogTitle>
+              <DialogTitle className="text-xl font-bold">Quit Game</DialogTitle>
             </DialogHeader>
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-6">
-                {/* Audio Settings */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-red-400">Audio</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="music">Music</Label>
-                      <Switch
-                        id="music"
-                        checked={settings.music}
-                        onCheckedChange={(checked) => 
-                          setSettings(prev => ({...prev, music: checked}))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <Label>Volume</Label>
-                        <span className="text-sm text-gray-400">{volume}%</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <VolumeX className="h-4 w-4 text-gray-400" />
-                        <Slider
-                          values={[volume]}
-                          min={0}
-                          max={100}
-                          step={1}
-                          className="flex-1"
-                          onValueChange={([value]) => setVolume(value)}
-                        />
-                        <Volume2 className="h-4 w-4 text-gray-400" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Game Settings */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-red-400">Game</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="fullscreen">Fullscreen</Label>
-                      <Switch
-                        id="fullscreen"
-                        checked={settings.fullscreen}
-                        onCheckedChange={(checked) => 
-                          setSettings(prev => ({...prev, fullscreen: checked}))
-                        }
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="autosave">Auto-Save</Label>
-                      <Switch
-                        id="autosave"
-                        checked={settings.autoSave}
-                        onCheckedChange={(checked) => 
-                          setSettings(prev => ({...prev, autoSave: checked}))
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ScrollArea>
+            <p className="text-gray-400">Are you sure you want to quit? Any unsaved progress will be lost.</p>
+            <DialogFooter className="flex space-x-2">
+              <Button
+                variant="ghost"
+                onClick={() => setShowQuitDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => window.close()}
+              >
+                Quit Game
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
