@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ArrowLeft, Shield, Sword, Brain, Heart } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { ArrowLeft, Shield, Sword, Brain, Heart, Edit2, Loader2 } from "lucide-react"
 import Link from "next/link"
 
 export default function CharacterSheet() {
@@ -29,6 +30,19 @@ export default function CharacterSheet() {
     }
   })
 
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState(character)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    setCharacter(editForm)
+    setIsSaving(false)
+    setIsEditing(false)
+  }
+
   const StatBlock = ({ label, value, icon: Icon }) => (
     <Card className="flex flex-col items-center p-4 bg-gray-800">
       <Icon className="h-6 w-6 mb-2 text-red-500" />
@@ -39,6 +53,127 @@ export default function CharacterSheet() {
         {Math.floor((value - 10) / 2)}
       </div>
     </Card>
+  )
+
+  const EditDialog = () => (
+    <Dialog open={isEditing} onOpenChange={setIsEditing}>
+      <DialogTrigger asChild>
+        <Button 
+          variant="outline" 
+          size="icon"
+          className="absolute top-4 right-4"
+        >
+          <Edit2 className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white">
+        <DialogHeader>
+          <DialogTitle>Edit Character</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="name">Character Name</Label>
+            <Input
+              id="name"
+              value={editForm.name}
+              onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+              className="bg-gray-800 border-gray-700"
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="class">Class</Label>
+              <Input
+                id="class"
+                value={editForm.class}
+                onChange={(e) => setEditForm({...editForm, class: e.target.value})}
+                className="bg-gray-800 border-gray-700"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="race">Race</Label>
+              <Input
+                id="race"
+                value={editForm.race}
+                onChange={(e) => setEditForm({...editForm, race: e.target.value})}
+                className="bg-gray-800 border-gray-700"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="level">Level</Label>
+              <Input
+                id="level"
+                type="number"
+                value={editForm.level}
+                onChange={(e) => setEditForm({...editForm, level: parseInt(e.target.value)})}
+                className="bg-gray-800 border-gray-700"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="maxHp">Max HP</Label>
+              <Input
+                id="maxHp"
+                type="number"
+                value={editForm.maxHp}
+                onChange={(e) => setEditForm({...editForm, maxHp: parseInt(e.target.value)})}
+                className="bg-gray-800 border-gray-700"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label>Ability Scores</Label>
+            <div className="grid grid-cols-3 gap-4">
+              {Object.entries(editForm.stats).map(([stat, value]) => (
+                <div key={stat} className="grid gap-1">
+                  <Label htmlFor={stat} className="text-xs capitalize">
+                    {stat}
+                  </Label>
+                  <Input
+                    id={stat}
+                    type="number"
+                    value={value}
+                    onChange={(e) => setEditForm({
+                      ...editForm,
+                      stats: {
+                        ...editForm.stats,
+                        [stat]: parseInt(e.target.value)
+                      }
+                    })}
+                    className="bg-gray-800 border-gray-700"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end gap-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsEditing(false)}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving
+              </>
+            ) : (
+              'Save Changes'
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 
   return (
@@ -56,7 +191,8 @@ export default function CharacterSheet() {
       <ScrollArea className="h-[calc(100vh-4rem)]">
         <div className="p-4 space-y-6">
           {/* Character Header */}
-          <Card className="p-6 bg-gray-800 space-y-4">
+          <Card className="p-6 bg-gray-800 space-y-4 relative">
+            <EditDialog />
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-full bg-red-600 flex items-center justify-center">
                 <span className="text-2xl font-bold">
