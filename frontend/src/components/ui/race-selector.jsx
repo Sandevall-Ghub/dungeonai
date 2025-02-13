@@ -2,124 +2,111 @@
 
 import { useState } from "react"
 import { Card } from "./card"
-import { ScrollArea } from "./scroll-area"
-import { Badge } from "./badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs"
+import { Button } from "./button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { RACES } from "@/lib/race-data"
 
-export function RaceSelector({ onSelect, selected }) {
-  const [selectedSubrace, setSelectedSubrace] = useState(null)
+export function RaceSelector({ onSelect }) {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const races = Object.entries(RACES)
 
-  const RaceCard = ({ id, race }) => (
-    <Card
-      className={`
-        relative p-6 cursor-pointer transition-all duration-300
-        ${selected === id 
-          ? 'bg-fantasy-800 border-amber-400/50' 
-          : 'bg-fantasy-900 border-fantasy-700 hover:bg-fantasy-800'}
-      `}
-      onClick={() => onSelect(id)}
-    >
-      {/* Ornate Border */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className={`
-          absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2
-          ${selected === id ? 'border-amber-400/50' : 'border-fantasy-700'}
-          transition-colors duration-300
-        `} />
-        <div className={`
-          absolute bottom-0 right-0 w-12 h-12 border-r-2 border-b-2
-          ${selected === id ? 'border-amber-400/50' : 'border-fantasy-700'}
-          transition-colors duration-300
-        `} />
-      </div>
+  const handlePrevious = () => {
+    setCurrentIndex((prev) => 
+      prev === 0 ? races.length - 1 : prev - 1
+    )
+  }
 
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-xl font-medieval text-amber-400">{race.name}</h3>
-          <p className="text-sm text-gray-400 mt-1">{race.description}</p>
-        </div>
+  const handleNext = () => {
+    setCurrentIndex((prev) => 
+      prev === races.length - 1 ? 0 : prev + 1
+    )
+  }
 
-        {/* Racial Features Preview */}
-        <div className="flex flex-wrap gap-2">
-          {race.features.slice(0, 2).map((feature) => (
-            <Badge 
-              key={feature.name}
-              className="bg-blue-500/20 text-blue-400"
-            >
-              {feature.name}
-            </Badge>
-          ))}
-        </div>
-
-        {/* Traits Preview */}
-        <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
-          <div>Size: {race.traits.size}</div>
-          <div>Speed: {race.traits.speed}</div>
-        </div>
-      </div>
-    </Card>
-  )
+  const currentRace = races[currentIndex][1]
 
   return (
-    <div className="space-y-6">
-      {/* Race Selection Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {Object.entries(RACES).map(([id, race]) => (
-          <RaceCard key={id} id={id} race={race} />
-        ))}
+    <div className="relative min-h-[600px] flex items-center justify-center">
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center transition-all duration-700"
+        style={{
+          backgroundImage: `url('https://sparkstack.app/api/mocks/images?query=fantasy+${races[currentIndex][0]}')`
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
       </div>
 
-      {/* Selected Race Details */}
-      {selected && RACES[selected] && (
-        <Card className="p-6 bg-fantasy-800 border-fantasy-700">
-          <ScrollArea className="h-[400px] pr-4">
-            <Tabs defaultValue="features" className="space-y-6">
-              <TabsList className="bg-fantasy-900">
-                <TabsTrigger value="features">Features</TabsTrigger>
-                <TabsTrigger value="traits">Traits</TabsTrigger>
-                <TabsTrigger value="lore">Lore</TabsTrigger>
-              </TabsList>
+      {/* Navigation Arrows */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute left-4 z-10 h-12 w-12 rounded-full 
+                   bg-black/20 hover:bg-red-950/30 backdrop-blur-sm
+                   border border-gray-800 hover:border-red-800
+                   text-gray-400 hover:text-red-400
+                   transition-all duration-300"
+        onClick={handlePrevious}
+      >
+        <ChevronLeft className="h-8 w-8" />
+      </Button>
 
-              <TabsContent value="features" className="space-y-4">
-                {RACES[selected].features.map((feature) => (
-                  <div key={feature.name} className="space-y-1">
-                    <h4 className="font-medieval text-amber-400">
-                      {feature.name}
-                    </h4>
-                    <p className="text-sm text-gray-400">
-                      {feature.description}
-                    </p>
-                  </div>
-                ))}
-              </TabsContent>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute right-4 z-10 h-12 w-12 rounded-full 
+                   bg-black/20 hover:bg-red-950/30 backdrop-blur-sm
+                   border border-gray-800 hover:border-red-800
+                   text-gray-400 hover:text-red-400
+                   transition-all duration-300"
+        onClick={handleNext}
+      >
+        <ChevronRight className="h-8 w-8" />
+      </Button>
 
-              <TabsContent value="traits">
-                <div className="space-y-4">
-                  {Object.entries(RACES[selected].traits).map(([trait, value]) => (
-                    <div key={trait} className="space-y-1">
-                      <h4 className="font-medieval text-amber-400 capitalize">
-                        {trait}
-                      </h4>
-                      <p className="text-sm text-gray-400">
-                        {Array.isArray(value) ? value.join(", ") : value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
+      {/* Race Display */}
+      <div className="relative z-10 text-center space-y-6">
+        <h2 className="text-6xl font-medieval text-white">
+          {currentRace.name}
+        </h2>
+        
+        {/* Ornate Divider */}
+        <div className="flex items-center justify-center gap-4">
+          <div className="h-[2px] w-24 bg-gradient-to-r from-transparent via-red-500 to-transparent" />
+          <div className="h-2 w-2 rotate-45 bg-red-500" />
+          <div className="h-[2px] w-24 bg-gradient-to-r from-transparent via-red-500 to-transparent" />
+        </div>
 
-              <TabsContent value="lore" className="space-y-4">
-                {RACES[selected].lore.map((text, index) => (
-                  <p key={index} className="text-sm text-gray-400">
-                    {text}
-                  </p>
-                ))}
-              </TabsContent>
-            </Tabs>
-          </ScrollArea>
+        {/* Race Description */}
+        <Card className="max-w-xl mx-auto bg-black/40 border-gray-800 backdrop-blur-sm p-6">
+          <p className="text-gray-300 text-lg">
+            {currentRace.description}
+          </p>
+          
+          {/* Race Features */}
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            {currentRace.features.map((feature) => (
+              <div 
+                key={feature.name}
+                className="p-3 bg-gray-900/50 border border-gray-800 rounded-lg"
+              >
+                <h4 className="text-red-400 font-medieval">{feature.name}</h4>
+                <p className="text-sm text-gray-400">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Selection Button */}
+          <Button 
+            className="mt-6 w-full bg-red-950/50 hover:bg-red-900/50 
+                     border border-red-800/50 hover:border-red-700
+                     text-red-100 hover:text-white
+                     transition-all duration-300"
+            onClick={() => onSelect(races[currentIndex][0])}
+          >
+            Choose {currentRace.name}
+          </Button>
         </Card>
-      )}
+      </div>
     </div>
   )
 }
