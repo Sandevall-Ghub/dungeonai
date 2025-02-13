@@ -1,45 +1,52 @@
 "use client"
 
 import { useState } from "react"
-import { BackButton } from "@/components/ui/back-button"
+import { MagicalCircle } from "@/components/ui/magical-circle"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
   User, Scroll, Shield, Book, 
-  Flame, Star, Magic
+  ChevronLeft, Star
 } from "lucide-react"
 
 export default function CharacterPage() {
   const [selectedTab, setSelectedTab] = useState('character')
-  
+  const [availableAP] = useState(10)
+
   const NavigationButton = ({ icon: Icon, label, value }) => (
     <button
       onClick={() => setSelectedTab(value)}
       className={`
-        w-full group relative flex items-center gap-3 px-6 py-4
-        text-left text-lg font-medium
+        group relative w-full px-8 py-4
+        flex items-center gap-3
+        font-medieval text-lg
         ${selectedTab === value ? 'text-amber-400' : 'text-gray-400'}
-        hover:text-amber-400 transition-colors
       `}
     >
-      {/* Ornate Left Border */}
+      {/* Ornate Background */}
       <div className={`
-        absolute left-0 top-0 bottom-0 w-1
-        ${selectedTab === value ? 'bg-amber-400' : 'bg-transparent'}
-        transition-colors
+        absolute inset-0 
+        ${selectedTab === value ? 'bg-gradient-to-r from-amber-500/20 to-transparent' : ''}
       `} />
       
-      {/* Hover Effect Background */}
+      {/* Left Border */}
       <div className={`
-        absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent
-        opacity-0 group-hover:opacity-100
-        ${selectedTab === value ? 'opacity-100' : ''}
-        transition-opacity
+        absolute left-0 top-2 bottom-2 w-1
+        ${selectedTab === value ? 'bg-amber-400' : ''}
+      `} />
+      
+      {/* Ornate Edges */}
+      <div className={`
+        absolute left-0 top-0 w-16 h-1
+        ${selectedTab === value ? 'bg-amber-400/20' : ''}
+      `} />
+      <div className={`
+        absolute left-0 bottom-0 w-16 h-1
+        ${selectedTab === value ? 'bg-amber-400/20' : ''}
       `} />
       
       <Icon className={`
-        h-5 w-5 transition-transform group-hover:scale-110
+        h-5 w-5
         ${selectedTab === value ? 'text-amber-400' : 'text-gray-500'}
       `} />
       {label}
@@ -47,75 +54,52 @@ export default function CharacterPage() {
   )
 
   return (
-    <div className="relative min-h-screen bg-[#0d1219] text-white overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-20"
-        style={{
-          backgroundImage: "url('https://sparkstack.app/api/mocks/images?query=dark+fantasy+castle')"
-        }}
-      />
+    <div className="min-h-screen bg-fantasy-900 text-white">
+      {/* Background Effects */}
+      <div className="fixed inset-0 bg-[url('/images/dark-texture.png')] opacity-20" />
       
-      {/* Content Layout */}
       <div className="relative z-10 flex h-screen">
-        {/* Left Navigation Panel */}
-        <div className="w-72 bg-[#0d1219]/90 border-r border-[#2a3446]">
-          <div className="p-6">
-            <h1 className="text-2xl font-bold text-amber-400">Character Creation</h1>
-          </div>
+        {/* Left Navigation */}
+        <div className="w-80 bg-fantasy-800/95 border-r border-fantasy-700">
+          {/* Back Button */}
+          <button className="flex items-center gap-2 p-6 text-gray-400 hover:text-amber-400">
+            <ChevronLeft className="h-5 w-5" />
+            Back
+          </button>
           
-          <div className="space-y-1">
-            <NavigationButton 
-              icon={User} 
-              label="Character" 
-              value="character" 
-            />
-            <NavigationButton 
-              icon={Scroll} 
-              label="Skills" 
-              value="skills" 
-            />
-            <NavigationButton 
-              icon={Shield} 
-              label="Equipment" 
-              value="equipment" 
-            />
-            <NavigationButton 
-              icon={Book} 
-              label="Story" 
-              value="story" 
-            />
+          <div className="space-y-1 pt-4">
+            <NavigationButton icon={User} label="Character" value="character" />
+            <NavigationButton icon={Scroll} label="Skills" value="skills" />
+            <NavigationButton icon={Shield} label="Equipment" value="equipment" />
+            <NavigationButton icon={Book} label="Story" value="story" />
           </div>
         </div>
 
-        {/* Main Content Area */}
+        {/* Main Content */}
         <div className="flex-1 relative">
-          <BackButton />
-          
-          {/* Top Stats Display */}
-          <div className="absolute top-6 right-6 flex items-center gap-4">
-            <div className="flex items-center gap-2 px-4 py-2 bg-[#1a2436]/90 rounded-full border border-[#2a3446]">
-              <Flame className="h-5 w-5 text-amber-400" />
-              <span className="text-amber-400">AP 10</span>
+          {/* AP Display */}
+          <div className="absolute top-6 right-6 flex items-center gap-2">
+            <div className="px-4 py-2 bg-fantasy-800/90 rounded-full border border-fantasy-700">
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-amber-400" />
+                <span className="text-amber-400 font-medieval">
+                  Available AP {availableAP}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Skill Tree / Main Content */}
-          <ScrollArea className="h-[calc(100vh-2rem)] p-6">
-            <div className="relative">
-              {/* Magical Circle Background */}
-              <div className="absolute right-0 top-0 w-96 h-96 opacity-20">
-                <div className="absolute inset-0 animate-spin-slow">
-                  {/* Add SVG magical circle here */}
-                </div>
-              </div>
+          {/* Skill Tree */}
+          <div className="absolute right-20 top-20 w-[500px] h-[500px]">
+            <MagicalCircle className="opacity-80" />
+          </div>
 
-              {/* Content Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-                <Card className="p-6 bg-[#1a2436]/90 border-[#2a3446]">
-                  {/* Add character content based on selectedTab */}
-                </Card>
-              </div>
+          {/* Content Area */}
+          <ScrollArea className="h-screen p-8">
+            <div className="max-w-2xl space-y-6">
+              <Card className="p-6 bg-fantasy-800/90 border-fantasy-700">
+                {/* Content based on selectedTab */}
+              </Card>
             </div>
           </ScrollArea>
         </div>

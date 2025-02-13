@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -41,6 +43,9 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --fantasy-900: #0d1219;
+    --fantasy-800: #1a2436;
+    --fantasy-700: #2a3446;
   }
   .dark {
     --background: 240 10% 3.9%;
@@ -85,4 +90,27 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.font-medieval {
+  font-family: 'MedievalSharp', cursive;
+}
+
+/* Glowing Effects */
+.glow-amber {
+  filter: drop-shadow(0 0 8px theme('colors.amber.400'));
+}
+
+.glow-blue {
+  filter: drop-shadow(0 0 8px theme('colors.blue.400'));
+}
+
+/* Magical Circle Animation */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
 }

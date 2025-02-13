@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
     darkMode: ["class"],
     content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -59,12 +59,15 @@ export default {
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
   			},
-        'fantasy': {
-          900: '#0d1219',
-          800: '#1a2436',
-          700: '#2a3446',
+        fantasy: {
+          900: 'var(--fantasy-900)',
+          800: 'var(--fantasy-800)',
+          700: 'var(--fantasy-700)',
         }
   		},
+      fontFamily: {
+        medieval: ['MedievalSharp', 'cursive'],
+      },
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
@@ -107,10 +110,12 @@ export default {
   			'accordion-up': 'accordion-up 0.2s ease-out',
         fadeIn: 'fadeIn 0.5s ease-in-out',
         fireParticle: 'fireParticle 1s ease-out forwards',
-        'spin-slow': 'spin 20s linear infinite'
+        'spin-slow': 'spin-slow 20s linear infinite',
+        'pulse-glow': 'pulse 2s ease-in-out infinite',
   		},
       backgroundImage: {
         'ornate-border': "url('/images/ornate-border.png')",
+        'dark-texture': "url('/images/dark-texture.png')",
       }
   	}
   },
