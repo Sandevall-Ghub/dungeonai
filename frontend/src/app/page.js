@@ -44,6 +44,9 @@ export default function Home() {
           <Users className="mb-4 h-8 w-8 text-red-500" />
           <h2 className="mb-2 text-xl font-bold">Character Creation</h2>
           <p className="text-gray-300">Design your hero with detailed customization</p>
+          <Link href="/character" className="mt-4 inline-block">
+            <Button variant="secondary" size="sm">View Character</Button>
+          </Link>
         </Card>
 
         <Card className="bg-gray-800 p-6 text-white">
