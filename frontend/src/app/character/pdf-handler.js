@@ -2,130 +2,53 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Progress } from "@/components/ui/progress"
-import { FileUp, Download, RefreshCw } from "lucide-react"
+import { Scroll, Download } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
-export function PDFHandler({ onImport }) {
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [error, setError] = useState(null)
-  const [showDialog, setShowDialog] = useState(false)
+export function PDFHandler() {
+  const { toast } = useToast()
+  const [isGenerating, setIsGenerating] = useState(false)
 
-  const handleFileSelect = async (event) => {
-    const file = event.target.files[0]
-    if (!file) return
-
-    if (file.type !== 'application/pdf') {
-      setError('Please select a PDF file')
-      return
-    }
-
-    setIsUploading(true)
-    setError(null)
-
+  const handleGeneratePDF = async () => {
+    setIsGenerating(true)
     try {
-      // Simulate file processing with progress
-      for (let i = 0; i <= 100; i += 20) {
-        setUploadProgress(i)
-        await new Promise(resolve => setTimeout(resolve, 500))
-      }
-
-      // Mock parsed character data
-      const mockParsedData = {
-        name: "Imported Character",
-        class: "Fighter",
-        race: "Human",
-        level: 1,
-        stats: {
-          strength: 16,
-          dexterity: 14,
-          constitution: 15,
-          intelligence: 12,
-          wisdom: 13,
-          charisma: 11
-        }
-      }
-
-      onImport(mockParsedData)
-      setShowDialog(false)
-    } catch (err) {
-      setError('Error processing PDF. Please try again.')
+      // Simulate PDF generation
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // In a real implementation, this would trigger the browser's download
+      // using a blob or file URL from your backend
+      
+      toast({
+        title: "Campaign Log Saved",
+        description: "Your adventure has been documented",
+        duration: 3000,
+      })
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to save campaign log",
+        description: "Please try again later",
+        duration: 3000,
+      })
     } finally {
-      setIsUploading(false)
-      setUploadProgress(0)
+      setIsGenerating(false)
     }
   }
 
   return (
-    <>
-      <div className="flex gap-2 mb-4">
-        <Button 
-          variant="outline" 
-          onClick={() => setShowDialog(true)}
-          className="flex items-center gap-2"
-        >
-          <FileUp className="h-4 w-4" />
-          Import from D&D Beyond
-        </Button>
-        <Button 
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <Download className="h-4 w-4" />
-          Export PDF
-        </Button>
-      </div>
-
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white">
-          <DialogHeader>
-            <DialogTitle>Import Character Sheet</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {isUploading ? (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span>Processing PDF...</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <Progress value={uploadProgress} className="h-2" />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-gray-400">
-                  Select your D&D Beyond character sheet PDF to import. 
-                  Your character data will be automatically synchronized.
-                </p>
-                <div className="flex justify-center">
-                  <label className="cursor-pointer">
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-red-500 transition-colors">
-                      <FileUp className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-400">
-                        Click to select PDF or drag and drop
-                      </p>
-                    </div>
-                  </label>
-                </div>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+    <Button 
+      variant="outline" 
+      onClick={handleGeneratePDF}
+      disabled={isGenerating}
+      className="flex items-center gap-2"
+    >
+      {isGenerating ? (
+        <Scroll className="h-4 w-4 animate-spin" />
+      ) : (
+        <Download className="h-4 w-4" />
+      )}
+      {isGenerating ? "Saving Campaign..." : "Save Campaign Log"}
+    </Button>
   )
 }
