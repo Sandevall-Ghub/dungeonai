@@ -103,15 +103,25 @@ module.exports = {
             transform: 'translateY(-100vh) scale(0)',
             opacity: '0'
           }
-        }
+        },
+        'float-up': {
+          '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+          '100%': { transform: 'translateY(-100px) scale(0)', opacity: '0' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { filter: 'brightness(1)' },
+          '50%': { filter: 'brightness(1.5)' },
+        },
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
         fadeIn: 'fadeIn 0.5s ease-in-out',
         fireParticle: 'fireParticle 1s ease-out forwards',
-        'spin-slow': 'spin-slow 20s linear infinite',
-        'pulse-glow': 'pulse 2s ease-in-out infinite',
+        'spin-slow': 'spin 20s linear infinite',
+        'spin-reverse-slow': 'spin 25s linear infinite reverse',
+        'float-up': 'float-up 2s ease-out forwards',
+        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
   		},
       backgroundImage: {
         'ornate-border': "url('/images/ornate-border.png')",

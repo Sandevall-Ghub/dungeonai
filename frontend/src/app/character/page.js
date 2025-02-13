@@ -12,6 +12,24 @@ import {
 export default function CharacterPage() {
   const [selectedTab, setSelectedTab] = useState('character')
   const [availableAP] = useState(10)
+  const [stats, setStats] = useState({
+    // Character Stats
+    strength: 10,
+    dexterity: 12,
+    constitution: 14,
+    intelligence: 16,
+    wisdom: 13,
+    charisma: 15,
+    // Skill Stats
+    combat: 5,
+    magic: 7,
+    stealth: 4,
+  })
+
+  const handleStatClick = (stat) => {
+    // Show stat modification dialog or tooltip
+    console.log(`Clicked stat: ${stat.label}`)
+  }
 
   const NavigationButton = ({ icon: Icon, label, value }) => (
     <button
@@ -89,9 +107,22 @@ export default function CharacterPage() {
             </div>
           </div>
 
-          {/* Skill Tree */}
-          <div className="absolute right-20 top-20 w-[500px] h-[500px]">
-            <MagicalCircle className="opacity-80" />
+          {/* Main Content Area */}
+          <div className="flex-1 relative">
+            {/* Magical Circle */}
+            <div className="absolute right-20 top-20 w-[600px] h-[600px]">
+              <MagicalCircle
+                selectedTab={selectedTab}
+                stats={stats}
+                onStatClick={handleStatClick}
+                className="opacity-90"
+              />
+            </div>
+
+            {/* Dynamic Content Based on Selected Tab */}
+            <div className="relative z-10 p-8">
+              {/* Add your tab-specific content here */}
+            </div>
           </div>
 
           {/* Content Area */}
