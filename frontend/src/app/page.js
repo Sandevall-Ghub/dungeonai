@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Slider } from "@/components/ui/slider"
@@ -9,10 +10,14 @@ import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Volume2, VolumeX, Settings, PlayCircle, Save, FileDown, Power } from "lucide-react"
 import Link from "next/link"
+import { FireTransition } from "@/components/ui/fire-transition"
 
 export default function Home() {
+  const router = useRouter()
   const [showSettings, setShowSettings] = useState(false)
   const [volume, setVolume] = useState(80)
+  const [showTransition, setShowTransition] = useState(false)
+  const [nextRoute, setNextRoute] = useState("")
   const [settings, setSettings] = useState({
     music: true,
     sfx: true,
@@ -39,8 +44,22 @@ export default function Home() {
     </Button>
   )
 
+  const handleNavigation = (route) => {
+    setNextRoute(route)
+    setShowTransition(true)
+  }
+
+  const handleTransitionComplete = () => {
+    router.push(nextRoute)
+  }
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black text-white">
+      <FireTransition 
+        show={showTransition} 
+        onComplete={handleTransitionComplete} 
+      />
+      
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-50"
@@ -66,10 +85,15 @@ export default function Home() {
 
         {/* Menu Options */}
         <div className="flex flex-col items-center space-y-4 w-full max-w-xs">
-          <MenuButton href="/game" variant="default">
+          <MenuButton 
+            onClick={() => handleNavigation("/game")} 
+            variant="default"
+          >
             CONTINUE
           </MenuButton>
-          <MenuButton href="/character">
+          <MenuButton 
+            onClick={() => handleNavigation("/character")}
+          >
             NEW GAME
           </MenuButton>
           <MenuButton onClick={() => setShowSettings(true)}>

@@ -11,6 +11,7 @@ import { ArrowLeft, Shield, Sword, Brain, Heart } from "lucide-react"
 import { PDFHandler } from "./pdf-handler"
 import { FileDropzone } from "./file-dropzone"
 import Link from "next/link"
+import { BackButton } from "@/components/ui/back-button"
 
 export default function CharacterSheet() {
   const [character, setCharacter] = useState({
@@ -47,11 +48,7 @@ export default function CharacterSheet() {
       {/* Header */}
       <div className="border-b border-gray-800 p-4 flex items-center justify-between">
         <div className="flex items-center">
-          <Link href="/">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
+          <BackButton />
           <h1 className="text-xl font-bold ml-4">Character Sheet</h1>
         </div>
         <PDFHandler />

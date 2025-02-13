@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { BackButton } from "@/components/ui/back-button"
 import { 
   Sword, Shield, Scroll, Backpack, 
   Map, Book, Settings, Save,
@@ -65,6 +66,8 @@ export default function GameScreen() {
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-gray-900">
+      <BackButton />
+      
       {/* Main Scene Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center transition-transform duration-700"

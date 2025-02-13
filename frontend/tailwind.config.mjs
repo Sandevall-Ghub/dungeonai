@@ -81,11 +81,27 @@ export default {
   				to: {
   					height: '0'
   				}
-  			}
+  			},
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
+        },
+        fireParticle: {
+          '0%': { 
+            transform: 'translateY(0) scale(1)',
+            opacity: '1'
+          },
+          '100%': { 
+            transform: 'translateY(-100vh) scale(0)',
+            opacity: '0'
+          }
+        }
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+        fadeIn: 'fadeIn 0.5s ease-in-out',
+        fireParticle: 'fireParticle 1s ease-out forwards'
   		}
   	}
   },
