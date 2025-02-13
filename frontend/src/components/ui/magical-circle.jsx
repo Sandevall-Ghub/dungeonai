@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 
 export function MagicalCircle({ 
@@ -10,7 +9,7 @@ export function MagicalCircle({
   onStatClick,
   className = "" 
 }) {
-  const [activeNodes, setActiveNodes] = useState([])
+  const [activeStats, setActiveStats] = useState([])
 
   // Define stat nodes based on selected tab
   const getStatNodes = () => {
@@ -30,7 +29,6 @@ export function MagicalCircle({
           { id: 'magic', label: 'Magic', value: stats.magic, color: 'blue' },
           { id: 'stealth', label: 'Stealth', value: stats.stealth, color: 'green' }
         ]
-      // Add more cases for other tabs
       default:
         return []
     }
@@ -38,9 +36,8 @@ export function MagicalCircle({
 
   return (
     <div className={cn("relative w-full h-full", className)}>
-      {/* Base Circle */}
       <svg viewBox="0 0 500 500" className="w-full h-full">
-        {/* Outer Decorative Circles */}
+        {/* Base Circles */}
         <circle 
           cx="250" cy="250" r="240" 
           className="fill-none stroke-amber-400/20 stroke-2"
@@ -63,68 +60,68 @@ export function MagicalCircle({
         </g>
 
         {/* Stat Nodes */}
-        <AnimatePresence>
-          {getStatNodes().map((stat, index) => {
-            const angle = (index * 360) / getStatNodes().length
-            const radius = 180
-            const x = 250 + radius * Math.cos((angle - 90) * (Math.PI / 180))
-            const y = 250 + radius * Math.sin((angle - 90) * (Math.PI / 180))
+        {getStatNodes().map((stat, index) => {
+          const angle = (index * 360) / getStatNodes().length
+          const radius = 180
+          const x = 250 + radius * Math.cos((angle - 90) * (Math.PI / 180))
+          const y = 250 + radius * Math.sin((angle - 90) * (Math.PI / 180))
 
-            return (
-              <motion.g
-                key={stat.id}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                onClick={() => onStatClick(stat)}
-                className="cursor-pointer"
+          return (
+            <g
+              key={stat.id}
+              onClick={() => onStatClick(stat)}
+              className={`
+                cursor-pointer transition-opacity duration-500
+                opacity-0 animate-fade-in
+              `}
+              style={{
+                animationDelay: `${index * 100}ms`
+              }}
+            >
+              {/* Connecting Line */}
+              <line
+                x1="250"
+                y1="250"
+                x2={x}
+                y2={y}
+                className={`stroke-${stat.color}-400/20 stroke-1`}
+              />
+
+              {/* Stat Circle */}
+              <circle
+                cx={x}
+                cy={y}
+                r="20"
+                className={`
+                  fill-${stat.color}-500/20 stroke-${stat.color}-400
+                  hover:fill-${stat.color}-500/40 hover:stroke-${stat.color}-300
+                  transition-all duration-300
+                `}
+              />
+              
+              {/* Stat Value */}
+              <text
+                x={x}
+                y={y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="fill-white text-sm font-bold"
               >
-                {/* Stat Circle */}
-                <circle
-                  cx={x}
-                  cy={y}
-                  r="20"
-                  className={`
-                    fill-${stat.color}-500/20 stroke-${stat.color}-400
-                    hover:fill-${stat.color}-500/40 hover:stroke-${stat.color}-300
-                    transition-all duration-300
-                  `}
-                />
-                
-                {/* Stat Value */}
-                <text
-                  x={x}
-                  y={y}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  className="fill-white text-sm font-bold"
-                >
-                  {stat.value}
-                </text>
+                {stat.value}
+              </text>
 
-                {/* Stat Label */}
-                <text
-                  x={x}
-                  y={y + 30}
-                  textAnchor="middle"
-                  className="fill-gray-400 text-xs"
-                >
-                  {stat.label}
-                </text>
-
-                {/* Connecting Lines */}
-                <line
-                  x1="250"
-                  y1="250"
-                  x2={x}
-                  y2={y}
-                  className={`stroke-${stat.color}-400/20 stroke-1`}
-                />
-              </motion.g>
-            )
-          })}
-        </AnimatePresence>
+              {/* Stat Label */}
+              <text
+                x={x}
+                y={y + 30}
+                textAnchor="middle"
+                className="fill-gray-400 text-xs"
+              >
+                {stat.label}
+              </text>
+            </g>
+          )
+        })}
 
         {/* Center Piece */}
         <circle
@@ -144,14 +141,14 @@ export function MagicalCircle({
         </text>
       </svg>
 
-      {/* Particle Effects */}
+      {/* Floating Particles */}
       <div className="absolute inset-0 pointer-events-none">
-        {activeNodes.map((node, index) => (
+        {activeStats.map((stat, index) => (
           <div
             key={`particle-${index}`}
             className={`
               absolute w-1 h-1 rounded-full
-              bg-${node.color}-400
+              bg-${stat.color}-400
               animate-float-up
             `}
             style={{

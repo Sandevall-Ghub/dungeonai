@@ -90,10 +90,6 @@ module.exports = {
   					height: '0'
   				}
   			},
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' }
-        },
         fireParticle: {
           '0%': { 
             transform: 'translateY(0) scale(1)',
@@ -112,16 +108,20 @@ module.exports = {
           '0%, 100%': { filter: 'brightness(1)' },
           '50%': { filter: 'brightness(1.5)' },
         },
+        'fadeIn': {
+          '0%': { opacity: '0', transform: 'scale(0.9)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
-        fadeIn: 'fadeIn 0.5s ease-in-out',
         fireParticle: 'fireParticle 1s ease-out forwards',
         'spin-slow': 'spin 20s linear infinite',
         'spin-reverse-slow': 'spin 25s linear infinite reverse',
         'float-up': 'float-up 2s ease-out forwards',
         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.5s ease-out forwards',
   		},
       backgroundImage: {
         'ornate-border': "url('/images/ornate-border.png')",
