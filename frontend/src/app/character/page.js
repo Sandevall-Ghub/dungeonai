@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Slider } from "@/components/ui/slider"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { DndMechanicsCard, DiceRoller, RuleReference } from "@/components/ui/dnd-mechanics"
 import { 
   Sword, Shield, Scroll, Heart, Brain, Crown, 
   Palette, Book, Feather, User
@@ -52,18 +53,28 @@ export default function CharacterPage() {
   })
 
   const StatBlock = ({ label, value, icon: Icon, onChange }) => (
-    <Card className="p-4 bg-gray-800/50 space-y-2">
-      <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-red-400" />
-        <Label className="text-sm text-gray-300">{label}</Label>
-      </div>
+    <Card className="p-4 bg-[#1a2436] border-[#2a3446] space-y-2">
+      <DndMechanicsCard
+        title={`${label} Check`}
+        description={`${label} represents your character's ${label.toLowerCase()} ability. 
+        The modifier (${Math.floor((value - 10) / 2)}) is added to relevant checks.`}
+      >
+        <div className="flex items-center gap-2">
+          <Icon className="h-5 w-5 text-blue-400" />
+          <Label className="text-sm text-gray-300">{label}</Label>
+        </div>
+      </DndMechanicsCard>
+      
       <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-400">Value: {value}</span>
-          <span className="text-gray-400">Modifier: {Math.floor((value - 10) / 2)}</span>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-400">Value: {value}</span>
+          <DiceRoller 
+            diceType={20} 
+            modifier={Math.floor((value - 10) / 2)} 
+          />
         </div>
         <Slider
-          values={[value]}
+          value={[value]}
           min={3}
           max={18}
           step={1}
@@ -75,14 +86,14 @@ export default function CharacterPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-[#0d1219] text-white">
       <BackButton />
       
       <div className="container mx-auto p-4 space-y-6">
         <h1 className="text-3xl font-bold text-center mb-8">Character Creation</h1>
 
         <Tabs defaultValue="basics" className="w-full">
-          <TabsList className="grid grid-cols-4 w-full bg-gray-800">
+          <TabsList className="grid grid-cols-4 w-full bg-[#1a2436]">
             <TabsTrigger value="basics" className="data-[state=active]:bg-red-950">
               <User className="h-4 w-4 mr-2" />
               Basics
@@ -104,7 +115,7 @@ export default function CharacterPage() {
           <ScrollArea className="h-[calc(100vh-12rem)]">
             <div className="p-4 space-y-6">
               <TabsContent value="basics" className="space-y-4">
-                <Card className="p-6 bg-gray-800/50 space-y-4">
+                <Card className="p-6 bg-[#1a2436] border-[#2a3446] space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Character Name</Label>
@@ -139,6 +150,12 @@ export default function CharacterPage() {
                       </Select>
                     </div>
                   </div>
+                  <RuleReference
+                    rule={{
+                      title: "Character Classes",
+                      description: "Your class is your character's calling, defining their abilities and role in the party."
+                    }}
+                  />
                 </Card>
               </TabsContent>
 
@@ -173,7 +190,7 @@ export default function CharacterPage() {
                     <div className="space-y-2">
                       <Label>Height (cm): {character.appearance.height}</Label>
                       <Slider
-                        values={[character.appearance.height]}
+                        value={[character.appearance.height]}
                         min={150}
                         max={200}
                         step={1}
@@ -197,7 +214,51 @@ export default function CharacterPage() {
                     stats: { ...character.stats, strength: value }
                   })}
                 />
-                {/* Add similar StatBlocks for other attributes */}
+                <StatBlock
+                  label="Dexterity"
+                  value={character.stats.dexterity}
+                  icon={Feather}
+                  onChange={(value) => setCharacter({
+                    ...character,
+                    stats: { ...character.stats, dexterity: value }
+                  })}
+                />
+                <StatBlock
+                  label="Constitution"
+                  value={character.stats.constitution}
+                  icon={Heart}
+                  onChange={(value) => setCharacter({
+                    ...character,
+                    stats: { ...character.stats, constitution: value }
+                  })}
+                />
+                <StatBlock
+                  label="Intelligence"
+                  value={character.stats.intelligence}
+                  icon={Brain}
+                  onChange={(value) => setCharacter({
+                    ...character,
+                    stats: { ...character.stats, intelligence: value }
+                  })}
+                />
+                <StatBlock
+                  label="Wisdom"
+                  value={character.stats.wisdom}
+                  icon={Scroll}
+                  onChange={(value) => setCharacter({
+                    ...character,
+                    stats: { ...character.stats, wisdom: value }
+                  })}
+                />
+                <StatBlock
+                  label="Charisma"
+                  value={character.stats.charisma}
+                  icon={Crown}
+                  onChange={(value) => setCharacter({
+                    ...character,
+                    stats: { ...character.stats, charisma: value }
+                  })}
+                />
               </TabsContent>
 
               <TabsContent value="background" className="space-y-4">
